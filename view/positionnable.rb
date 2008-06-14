@@ -1,17 +1,13 @@
 module View
   
   module Positionnable
-    
-    attr_accessor :x, :y
-    
-    def initialize(x,y)
-      @x , @y = x, y
-    end
-    
+   
+    attr_reader :x, :y
+
     def set_pos(x,y)
-      @x , @y = x, y
+      @x, @y = x, y
     end
-    
-  end
+
+  end 
 
 end

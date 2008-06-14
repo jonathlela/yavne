@@ -3,10 +3,10 @@ require "controller/controller.rb"
 require "view/gui.rb"
 
 data = Model::Model.new()
-app = View::Gui.new()
-app.update(data.state)
-controller = Controller::Controller.new(app,data)
-app.controller = controller
+controller = Controller::Controller.new(data)
+app = View::Gui.new(controller)
+controller.view = app
+app.update_state(data.state)
 
 while !app.is_finished
   app.run()

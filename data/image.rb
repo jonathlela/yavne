@@ -3,17 +3,17 @@ require "data/element.rb"
 
 module Model
 
-  class Image < Element
+  class Image < SingleElement
 
     include Positionnable
     
-    attr_reader :image
+    attr_reader :path
     
     def initialize(path,time=Element::NO_TIME)
       super(time)
       left()
       top()
-      @image = path
+      @path = path
       @type = "image"
     end
     

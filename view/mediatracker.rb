@@ -1,5 +1,6 @@
 require "view/image.rb"
 require "view/text.rb"
+require "view/textbox.rb"
 
 module View
 
@@ -16,10 +17,12 @@ module View
         return @renderables[id]
       else
         case render.type
-          when "image"
-          render = Image.new(render.image)
-          when "text"
+        when "image"
+          render = Image.new(render.path)
+        when "text"
           render = Text.new(render.text,render.color,render.font,render.size)
+        when "textbox"
+          render = Textbox.new(render.box,render.texts)
         end
           @renderables[id] = render
         return render

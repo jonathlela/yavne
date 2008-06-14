@@ -4,7 +4,7 @@ class State
 
   @@ids = 0
 
-  attr_accessor :background, :sprites, :textbox, :text, :sfx, :elements, :next
+  attr_accessor :background, :sprites, :textbox, :sfx, :elements, :next
 
   def initialize()
     @@ids += 1

@@ -1,17 +1,13 @@
 require 'sdl'
 require 'opengl'
 require "view/renderable.rb"
-require "view/positionnable.rb"
 
 module View
 
-class Image < Renderable
-
-  include Positionnable
-
-  attr_reader :w, :h, :pixels
+class Image < SingleRenderable
 
   def initialize(path)
+    super()
     image= SDL::Surface.load(path)
     @w = image.w
     @h = image.h
@@ -24,6 +20,7 @@ class Image < Renderable
     GL.TexParameter(GL::TEXTURE_2D,GL::TEXTURE_MIN_FILTER,GL::NEAREST)
     GL.TexImage2D(GL::TEXTURE_2D,0,GL::RGBA,@w,@h,0,
                   GL::RGBA,GL::UNSIGNED_BYTE,@pixels)
+    return i + 1
   end
 
 end

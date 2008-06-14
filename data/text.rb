@@ -2,13 +2,13 @@ require "data/element.rb"
 
 module Model
 
-  class Text < Element
+  class Text < SingleElement
+    
+    attr_reader :text, :color, :font, :size
 
     include Positionnable
     
-    attr_reader :text, :color, :font, :size
-    
-    def initialize(text,color,font,size,time=Element::NOTIME)
+    def initialize(text,color,font,size,time=Element::NO_TIME)
       super(time)
       @text = text
       @color = color
@@ -18,5 +18,6 @@ module Model
     end
     
   end
+
   
 end
