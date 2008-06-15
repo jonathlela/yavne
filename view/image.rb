@@ -20,7 +20,6 @@ class Image < SingleRenderable
     GL.TexParameter(GL::TEXTURE_2D,GL::TEXTURE_MIN_FILTER,GL::NEAREST)
     GL.TexImage2D(GL::TEXTURE_2D,0,GL::RGBA,@w,@h,0,
                   GL::RGBA,GL::UNSIGNED_BYTE,@pixels)
-    return i + 1
   end
 
 end

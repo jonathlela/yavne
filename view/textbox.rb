@@ -10,7 +10,7 @@ module View
 
     def initialize(box,texts,interline=0)
       super()
-      @box = Image.new(box.path)
+      @box = box
       @w = @box.w
       @h = @box.h
       @x = @box.x

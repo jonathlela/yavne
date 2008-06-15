@@ -21,9 +21,13 @@ module View
 
   class SingleRenderable < Renderable
 
-    attr_reader :pixels
+    @@ids = 0
+
+    attr_reader :id, :pixels
 
     def initialize()
+      @@ids += 1
+      @id = @@ids
       @compound = false
       @rendered = true
     end
@@ -45,7 +49,6 @@ module View
       GL.End()
       GL.PopMatrix()
       GL.Disable(GL::TEXTURE_2D)
-      return i + 1
     end
     
   end
@@ -56,27 +59,6 @@ module View
 
     def initialize()
       @compound = true
-    end
-
-    # Won't work for multi compound elements!
-    # Must do a real texture manager
-
-    def render(i,x=@x,y=@y)
-      @elements.each { |elt|
-        if @render_elements.include? elt then
-          i = elt.render(i)
-        else
-          i += 1 # Work only if skipped element was single
-        end
-      }
-      return i
-    end
-
-    def texturize(i)
-      @elements.each { |elt|
-        i = elt.texturize(i)
-      }
-      return i
     end
     
   end

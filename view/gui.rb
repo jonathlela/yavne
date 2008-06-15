@@ -8,6 +8,7 @@ require "view/mediatracker.rb"
 require "view/positionner.rb"
 require "view/timer.rb"
 require "view/time.rb"
+require "view/texturemanager.rb"
 require "view/pollevent.rb"
 require "view/event.rb"
 
@@ -26,6 +27,7 @@ class Gui
     @render = Screen.new(800,600,16)
     @mediatracker = MediaTracker.new()
     @positionner = Positionner.new(@render,@mediatracker)
+    @texturemanager = TextureManager.new()
     SDL::Mouse.show()
     SDL::TTF.init()
     @fps = 0    
@@ -77,9 +79,8 @@ class Gui
   end
 
   def update()
-    i = 0
     @elements.each { |elt|
-      i = elt.texturize(i)
+      @texturemanager.load(elt)
     }
   end
 
@@ -128,13 +129,23 @@ class Gui
     end
   end
 
+  def render_element(element)
+    if element.compound? then
+      element.render_elements.each { |elt|
+        render_element(elt)
+      }
+    else
+      i = @texturemanager.get(element)
+      element.render(i)
+    end
+  end
+
   def render()
     GL.MatrixMode(GL::MODELVIEW)     
     GL.LoadIdentity()
     GL.Clear(GL::COLOR_BUFFER_BIT)
-    i = 0
     @elements.each { |elt|
-      i = elt.render(i)
+      render_element(elt)
     }
     SDL.GLSwapBuffers()
   end
