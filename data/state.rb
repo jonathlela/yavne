@@ -4,7 +4,7 @@ module Model
 
     @@ids = 0
 
-    attr_accessor :background, :sprites, :textbox, :sfx, :elements, :next
+    attr_accessor :background, :sprites, :textbox, :music, :sfx, :elements, :next
     
     def initialize()
       @@ids += 1

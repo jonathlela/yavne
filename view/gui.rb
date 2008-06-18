@@ -19,7 +19,7 @@ module View
 
 class Gui
   
-  attr_reader :is_finished, :elements
+  attr_reader :is_finished, :renderables
 
   def initialize(controller)
     @controller = Controller.new(controller,self)
@@ -30,6 +30,8 @@ class Gui
     @texturemanager = TextureManager.new()
     SDL::Mouse.show()
     SDL::TTF.init()
+    SDL.init(SDL::INIT_AUDIO)
+    SDL::Mixer.open(44100, SDL::Mixer::DEFAULT_FORMAT, 2, 1024)
     @fps = 0    
     @last_fps = SDL::get_ticks()/1000
     @fps_timer = Timer.new(100)
@@ -50,7 +52,7 @@ class Gui
     end
   end
 
-  def update_elt(elt)
+  def update_render(elt)
     update_time(elt)
     element = @mediatracker.get_renderable(elt)
     if element.compound? then
@@ -59,27 +61,40 @@ class Gui
     element.set_pos(@positionner.calculate_hpos(elt),@positionner.calculate_vpos(elt))
     return element
   end
+  
+  def update_play(elt)
+    update_time(elt)
+    return @mediatracker.get_playables(elt)
+  end
 
   def update_state(state)
     @step += 1
-    @elements = Array.new()
+    @renderables = Array.new()
+    @playables = Array.new()
     if state.background != nil then
-      @elements.push(update_elt(state.background))
+      @renderables.push(update_render(state.background))
     end
     if state.sprites != nil then
       sprites = state.sprites.collect { |img|
-        update_elt(img)
+        update_render(img)
       }
-      @elements.concat(sprites)
+      @renderables.concat(sprites)
     end
     if state.textbox != nil then
-      @elements.push(update_elt(state.textbox))
+      @renderables.push(update_render(state.textbox))
+    end
+    if state.music != nil then
+      @playables.push(update_play(state.music))
+    end
+    if state.sfx != nil then
+      @playables.push(update_play(state.sfx))
     end
     update()
+    play()
   end
 
   def update()
-    @elements.each { |elt|
+    @renderables.each { |elt|
       @texturemanager.load(elt)
     }
   end
@@ -140,11 +155,17 @@ class Gui
     end
   end
 
+  def play()
+    @playables.each { |play|
+      play.play()
+    }
+  end
+
   def render()
     GL.MatrixMode(GL::MODELVIEW)     
     GL.LoadIdentity()
     GL.Clear(GL::COLOR_BUFFER_BIT)
-    @elements.each { |elt|
+    @renderables.each { |elt|
       render_element(elt)
     }
     SDL.GLSwapBuffers()

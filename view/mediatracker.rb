@@ -1,6 +1,8 @@
 require "view/image.rb"
 require "view/text.rb"
 require "view/textbox.rb"
+require "view/music.rb"
+require "view/sound.rb"
 
 module View
 
@@ -8,7 +10,7 @@ module View
 
     def initialize()
       @renderables = Hash.new()
-      @musics = Hash.new()
+      @playables = Hash.new()
     end
 
     def get_renderable(render)
@@ -40,7 +42,29 @@ module View
         return render
       end
     end
-    
+
+    def get_playables(play)
+      id = play.id
+      if @playables.has_key?(id) then
+        return @playables[id]
+      else
+        case play.type
+          when "music"
+          if play.loops == Model::Music::INFINITE_LOOP then
+            play = Music.new(play.path,-1)
+          else
+            play = Music.new(play.path,play.loops)
+          end
+          when "sound"
+          if play.loops == Model::Music::INFINITE_LOOP then
+            play = Sound.new(play.path,-1)
+          else
+            play = Sound.new(play.path,play.loops)
+          end
+        end
+      end
+    end
+
   end
   
 end

@@ -9,7 +9,7 @@ module View
 
     def on_click()
       not_fully_rendered = Array.new()
-      @view.elements.each { |elt|
+      @view.renderables.each { |elt|
         if !elt.fully_rendered?() then
           not_fully_rendered.push(elt)
         end

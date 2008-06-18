@@ -3,6 +3,8 @@ require "data/state.rb"
 require "data/image.rb"
 require "data/text.rb"
 require "data/textbox.rb"
+require "data/music.rb"
+require "data/sound.rb"
 
 module Model
 
@@ -46,6 +48,9 @@ class Model
     textbox2.add_text(text2)
     textbox2.center()
     textbox2.bottom()
+    music = Music.new("data/music.ogg")
+    sound1 = Sound.new("data/yeah.wav")
+    sound2 = Sound.new("data/hehe.wav")
     image1= Image.new("data/image.png")
     image1.left()
     image1.top_of(textbox1)
@@ -60,6 +65,9 @@ class Model
     state2.sprites = [image2]
     state1.textbox = textbox1
     state2.textbox = textbox2
+    state1.music = music
+    state1.sfx = sound1
+    state2.sfx = sound2
     next1=lambda {|x| state2}
     next2=lambda {|x| state1}
     state1.next=next1
