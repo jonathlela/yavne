@@ -8,7 +8,7 @@ module View
     
     attr_reader :box, :texts
 
-    def initialize(box,texts,interline=0)
+    def initialize(box,paragraphes,interline=0)
       super()
       @box = box
       @w = @box.w
@@ -20,12 +20,19 @@ module View
       @rightmargin = 0
       @topmargin = 0
       @bottommargin = 0
+      @textLines = Array.new
       @texts = Array.new()
-      texts.each { |line|
-        update_lines(line)
+      puts paragraphes.inspect
+      paragraphes.each { |paragraphe|
+        textLines = convertParagrapheToTextLinesFittingBoxWidth(paragraphe);
+        textLines.each { |textLine|
+          @texts.push Text.new(textLine, paragraphe.color, paragraphe.font, paragraphe.size)
+        }
+        @textLines += textLines
       }
       @cursor = 0
       update_viewable_texts()
+      
       @elements = [@box] + @texts
       @render_elements = [@box] + @viewable_texts
     end
@@ -55,24 +62,26 @@ module View
       loop(test,(arr.size()-1),0,arr.size())
     end
     
-    def update_lines(line)
-      test = lambda { |arr| lambda { |i|
-          text=arr[0..i].join(" ")
-          render = Text.new(text,line.color,line.font,line.size)
+    def convertParagrapheToTextLinesFittingBoxWidth(paragraphe)
+      textLines = Array.new 
+      renderedLineIsShorterThanTextBox = lambda { |words| lambda { |i|
+          text=words[0..i].join(" ")
+          render = Text.new(text,paragraphe.color,paragraphe.font,paragraphe.size)
         return render.w <= @box.w - @leftmargin - @rightmargin
         }}
-      arr = line.text.split()
-      def loop1(test,arr,line)
-        if !arr.empty? then
-          cand = dichotomic(arr,test[arr])
-          text = Text.new(arr[0..cand].join(" "),line.color,line.font,line.size)
-          @texts.push(text)
-          if cand < arr.size() - 1 then
-            loop1(test,arr[(cand+1)..(arr.size()-1)],line)
+      words = paragraphe.text.split
+      def findLongestTextsComplyingToCondition(condition,words,paragraphe, textLines)
+        if !words.empty? then
+          cand = dichotomic(words,condition[words])
+          text = words[0..cand].join(" ")
+          textLines.push(text)
+          if cand < words.size() - 1 then
+            findLongestTextsComplyingToCondition(condition,words[(cand+1)..(words.size()-1)],paragraphe, textLines)
           end
         end
       end
-      loop1(test,arr,line)
+      findLongestTextsComplyingToCondition(renderedLineIsShorterThanTextBox,words,paragraphe,textLines)
+      return textLines
     end
 
     def update_viewable_texts()
