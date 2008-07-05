@@ -33,7 +33,7 @@ module View
                               SDL::HWSURFACE,
                               w, h, 32,
                               amask,bmask,gmask,rmask)
-      text.fill_rect(0,0,w,h, @color.map{|i|(i*255).to_i})
+      text.fill_rect(0,0,w,h, @color)
       @pixels = as_alpha(text.pixels, mask.pixels)
       @w = text.w
       @h = text.h
@@ -48,6 +48,11 @@ module View
       pixels
     end
     
+    def self.text_size(text,font,size)
+      font = SDL::TTF.open(font,size)
+      return font.text_size(text)
+    end
+
     def texturize(i)
       GL.BindTexture(GL::TEXTURE_2D,i)
       GL.TexParameter(GL::TEXTURE_2D,GL::TEXTURE_MAG_FILTER,GL::LINEAR)

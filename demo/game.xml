@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<game>
+  <resources>
+    <image id="image_1" path="images/Beach time.png"/>
+    <image id="image_2" path="images/image.png"/>
+    <image id="image_3" path="images/image2.png"/>
+    <image id="image_4" path="images/text.png"/>
+    <font id="font_1" path="/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif.ttf"/>
+    <font id="font_2" path="/usr/share/fonts/truetype/kochi/kochi-gothic.ttf"/>
+    <music id="music_1" path="musics/music.ogg"/>
+    <sound id="sound_1" path="sounds/yeah.wav"/>
+    <sound id="sound_2" path="sounds/hehe.wav"/>
+  </resources>
+  <play>
+    <init scene="scene_1"/>
+    <scene id="scene_1">
+      <background id="background_1" image="image_1">
+	<position>
+	  <horizontal align="center"/>
+	  <vertical align="middle"/>
+	</position>	
+      </background>
+      <sprite id="sprite_1" image="image_2">
+	<position>
+	  <horizontal align="left"/>
+	  <vertical top_of="textbox_1"/>
+	</position>
+      </sprite>
+      <texts id="textbox_1" textbox="image_4">
+	<position>
+	  <horizontal align="center"/>
+	  <vertical align="bottom"/>
+	</position>	
+	<text data="Hello World! This surely will go beyond a simple line if I don't stop adding unnecessary words at the end of the line."
+	      color="#FFFFFF" font="font_1" size="30"/>
+	<text data="Oh magic! I've been mistaken, the programmer is so neat!"
+	      color="#FFFFFF" font="font_1" size="30"/>
+	<text data="Let me see now if it cans go deeper."
+	      color="#FFFFFF" font="font_1" size="30"/>
+	<text data="エッチなのはいけないと思います！"
+	      color="#FFFFFF" font="font_2" size="30"/>
+      </texts>
+      <music play="music_1"/>
+      <sound play="sound_1"/>
+      <next scene="scene_2"/>
+    </scene>
+    <scene id="scene_2">
+      <background id="background_1" image="image_1">
+	<position>
+	  <horizontal align="center"/>
+	  <vertical align="middle"/>
+	</position>	
+      </background>
+      <sprite id="sprite_2" image="image_3">
+	<position>
+	  <horizontal align="right"/>
+	  <vertical top_of="textbox_1"/>
+	</position>
+      </sprite>
+      <texts id="textbox_2" textbox="image_4">
+	<position>
+	  <horizontal align="center"/>
+	  <vertical align="bottom"/>
+	</position>
+	<text data="Hello Only!"
+	      color="#00FFFF" font="font_1" size="30" 
+	      timeout="1000"/>
+      </texts>
+      <sound play="sound_2"/>
+      <next scene="scene_1"/>
+    </scene>
+  </play>
+</game>

@@ -34,7 +34,7 @@ class Gui
     SDL::Mixer.open(44100, SDL::Mixer::DEFAULT_FORMAT, 2, 1024)
     @fps = 0    
     @last_fps = SDL::get_ticks()/1000
-    @fps_timer = Timer.new(100)
+    @fps_timer = Timer.new(1000)
     @event_timer = Timer.new(1000)
     @pollevent = PollEvent.new()
     @step = 0
@@ -74,7 +74,7 @@ class Gui
     if state.background != nil then
       @renderables.push(update_render(state.background))
     end
-    if state.sprites != nil then
+    if !state.sprites.empty? then
       sprites = state.sprites.collect { |img|
         update_render(img)
       }

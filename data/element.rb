@@ -21,7 +21,7 @@ module Model
 
   class SingleElement < Element
     
-    attr_reader :time 
+    attr_accessor :time 
 
     def initialize(time=NO_TIME)
       super()

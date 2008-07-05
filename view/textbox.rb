@@ -8,7 +8,7 @@ module View
     
     attr_reader :box, :texts
 
-    def initialize(box,paragraphes,interline=0)
+    def initialize(box,paragraphs,interline=0)
       super()
       @box = box
       @w = @box.w
@@ -22,11 +22,10 @@ module View
       @bottommargin = 0
       @textLines = Array.new
       @texts = Array.new()
-      puts paragraphes.inspect
-      paragraphes.each { |paragraphe|
-        textLines = convertParagrapheToTextLinesFittingBoxWidth(paragraphe);
+      paragraphs.each { |paragraph|
+        textLines = convertParagraphToTextLinesFittingBoxWidth(paragraph);
         textLines.each { |textLine|
-          @texts.push Text.new(textLine, paragraphe.color, paragraphe.font, paragraphe.size)
+          @texts.push Text.new(textLine, paragraph.color, paragraph.font, paragraph.size)
         }
         @textLines += textLines
       }
@@ -62,25 +61,25 @@ module View
       loop(test,(arr.size()-1),0,arr.size())
     end
     
-    def convertParagrapheToTextLinesFittingBoxWidth(paragraphe)
+    def convertParagraphToTextLinesFittingBoxWidth(paragraph)
       textLines = Array.new 
       renderedLineIsShorterThanTextBox = lambda { |words| lambda { |i|
           text=words[0..i].join(" ")
-          render = Text.new(text,paragraphe.color,paragraphe.font,paragraphe.size)
-        return render.w <= @box.w - @leftmargin - @rightmargin
+          w,h = Text::text_size(text,paragraph.font,paragraph.size)
+          return w <= @box.w - @leftmargin - @rightmargin
         }}
-      words = paragraphe.text.split
-      def findLongestTextsComplyingToCondition(condition,words,paragraphe, textLines)
+      words = paragraph.text.split
+      def findLongestTextsComplyingToCondition(condition,words,paragraph, textLines)
         if !words.empty? then
           cand = dichotomic(words,condition[words])
           text = words[0..cand].join(" ")
           textLines.push(text)
           if cand < words.size() - 1 then
-            findLongestTextsComplyingToCondition(condition,words[(cand+1)..(words.size()-1)],paragraphe, textLines)
+            findLongestTextsComplyingToCondition(condition,words[(cand+1)..(words.size()-1)],paragraph, textLines)
           end
         end
       end
-      findLongestTextsComplyingToCondition(renderedLineIsShorterThanTextBox,words,paragraphe,textLines)
+      findLongestTextsComplyingToCondition(renderedLineIsShorterThanTextBox,words,paragraph,textLines)
       return textLines
     end
 
