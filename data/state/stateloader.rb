@@ -1,6 +1,6 @@
 require 'rexml/document'
 require 'pathname'
-require "data/state.rb"
+require "data/state/state.rb"
 require "data/image.rb"
 require "data/text.rb"
 require "data/textbox.rb"
@@ -9,15 +9,7 @@ require "data/sound.rb"
 
 module Model
 
-  class Loader
-
-    attr_reader :init
-
-    def initialize(file)
-      @init = load_file(file)
-    end
-
-    private
+  class StateLoader
 
     def check_file(path,directory)
       path = Pathname.new(path)
@@ -147,7 +139,7 @@ module Model
     def get_scenes(scenes)
       res = Hash.new()
       scenes.each_element("scene") { |scene|
-        state = State.new()
+        state = createState()
       scene.each_element { |element|
           case element.name
           when "background"
@@ -218,9 +210,16 @@ module Model
       return res
     end
     
+    def createState()
+      @increment_id +=1
+      state = State.new(@increment_id)
+      return state
+    end
+    
     def load_file(file)
       doc = REXML::Document.new(file)
       directory = File.expand_path(File.dirname(file.path))
+      @increment_id = 0
       @resources = get_resources(doc.root.elements["resources"],directory)
       @states = get_scenes(doc.root.elements["play"])
       state = resolve(doc.root.elements["play"])

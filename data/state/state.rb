@@ -2,13 +2,10 @@ module Model
 
   class State
 
-    @@ids = 0
-
     attr_accessor :background, :sprites, :textbox, :music, :sfx, :elements, :next
     
-    def initialize()
-      @@ids += 1
-      @id = @@ids
+    def initialize(id)
+      @id = id
       @sprites = Array.new()
       @elements = Array.new()    
     end

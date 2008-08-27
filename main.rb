@@ -1,11 +1,8 @@
-$LOAD_PATH << File.expand_path(File.dirname(__FILE__)+ "/..")
-
-require "data/model.rb"
-require "data/modelfactory.rb"
+require "data/data.rb"
 require "controller/controller.rb"
 require "view/gui.rb"
 
-data = Model::ModelFactory.createFromFile("game.xml")
+data = Model::Model.new(File.new("demo/game.xml"))
 controller = Controller::Controller.new(data)
 app = View::Gui.new(controller)
 controller.view = app
