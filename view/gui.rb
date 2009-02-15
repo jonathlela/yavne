@@ -34,7 +34,7 @@ class Gui
     SDL::Mixer.open(44100, SDL::Mixer::DEFAULT_FORMAT, 2, 1024)
     @fps = 0    
     @last_fps = SDL::get_ticks()/1000
-    @fps_timer = Timer.new(1000)
+    @fps_timer = Timer.new(0)
     @event_timer = Timer.new(1000)
     @pollevent = PollEvent.new()
     @step = 0
