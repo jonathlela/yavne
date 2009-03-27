@@ -1,28 +1,16 @@
-require 'sdl'
 require 'opengl'
 
 module View
 
-class Screen
-  
+class Gl_screen
+
   attr_reader :screen, :width, :height
 
-  def initialize(width,height,bpp)
-    @width = width
-    @height = height
-    @bpp = bpp
-    @screen = init_SDL()
+  def initialize(window)
+    @width = window.width
+    @height = window.height
+    @screen = window.screen  
     init_view()
-  end
-
-  def init_SDL()
-    SDL.init(SDL::INIT_VIDEO)    
-    SDL.setGLAttr(SDL::GL_RED_SIZE,5)
-    SDL.setGLAttr(SDL::GL_GREEN_SIZE,5)
-    SDL.setGLAttr(SDL::GL_BLUE_SIZE,5)
-    SDL.setGLAttr(SDL::GL_DEPTH_SIZE,16)
-    SDL.setGLAttr(SDL::GL_DOUBLEBUFFER,1)
-    return SDL.setVideoMode(@width,@height,@bpp,SDL::OPENGL)  
   end
 
   def init_view()

@@ -1,6 +1,7 @@
 require 'sdl'
 require 'opengl'
 require "view/controller.rb"
+require "view/sdlwindow.rb"
 require "view/glscreen.rb"
 require "view/image.rb"
 require "view/text.rb"
@@ -24,7 +25,8 @@ class Gui
   def initialize(controller)
     @controller = Controller.new(controller,self)
     @is_finished = false
-    @render = Screen.new(800,600,16)
+    @window = SDL_window.new(800,600,16)
+    @render = Gl_screen.new(@window)
     @mediatracker = MediaTracker.new()
     @positionner = Positionner.new(@render,@mediatracker)
     @texturemanager = TextureManager.new()
@@ -169,6 +171,12 @@ class Gui
       render_element(elt)
     }
     SDL.GLSwapBuffers()
+  end
+
+  def main()
+    while @is_finished do
+      run()
+    end
   end
 
 end
