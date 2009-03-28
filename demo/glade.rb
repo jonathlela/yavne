@@ -1,6 +1,15 @@
 #!/usr/bin/env ruby
+
+$LOAD_PATH << File.expand_path(File.dirname(__FILE__)+ "/..")
+
 require 'gtkglext'
 require 'libglade2'
+
+require "data/model.rb"
+require "data/modelfactory.rb"
+require "controller/controller.rb"
+require "view/sdlwindow.rb"
+require "view/gui.rb"
 
 ## -----------------------------------------------------------------------------
 ## A generic class for OpenGL application functions.
@@ -63,32 +72,41 @@ end
 ## A GtkDrawingArea widget with OpenGL rendering capabilities.
 ## -----------------------------------------------------------------------------
 class GLDrawingArea < Gtk::DrawingArea
+
+  attr_reader :width, :height
+
   def initialize(width, height, fov, gl_config)
     super()
     set_size_request(width, height)
     set_gl_capability(gl_config)
 
-    ## Create an OpenGL renderer instance.
-    @render = GLRender.new(fov)
+    @width = width
+    @height = height
 
-    ## Signal handler for drawing area initialisation.
+    ## Create an OpenGL renderer instance.
+    #@render = GLRender.new(fov)
+
+    data = Model::ModelFactory.createFromFile("../demo/game.xml")
+    controller = Controller::Controller.new(data)
+
+    ##Signal handler for drawing area initialisation.
     signal_connect_after("realize") do
-      gl_begin() { @render.init() }
+      @app.main()
     end
 
     ## Signal handler for drawing area reshapes.
-    signal_connect_after("configure_event") do
-      gl_begin() { @render.resize(allocation.width, allocation.height) }
-    end
+    #signal_connect_after("configure_event") do
+    #  gl_begin() { @render.resize(allocation.width, allocation.height) }
+    #end
 
     ## Signal handler for drawing area expose events.
-    signal_connect_after("expose_event") do
-      gl_begin() do
-        @render.draw()
-      end
+    #signal_connect_after("expose_event") do
+    #  gl_begin() do
+    #    @render.draw()
+    #  end
 
-      gl_drawable.swap_buffers() if gl_drawable.double_buffered?
-    end
+    #  gl_drawable.swap_buffers() if gl_drawable.double_buffered?
+    #end
 
     ## Add mouse button press/release signal event handlers
     add_events(Gdk::Event::BUTTON_PRESS_MASK |
@@ -96,10 +114,20 @@ class GLDrawingArea < Gtk::DrawingArea
 
     signal_connect_after("button_press_event") { button_press_event() }
     signal_connect_after("button_release_event") { button_release_event() }
+
+    @app = View::Gui.new(controller,self)
+    controller.view = @app
+    @app.update_state(data.state)
   end
 
   def gl_begin()
     gl_drawable.gl_begin(gl_context) { yield }
+  end
+
+  def gl_swap()
+    if gl_drawable.double_buffered? then
+      gl_drawable.swap_buffers()
+    end
   end
 
   def button_press_event()
@@ -127,6 +155,7 @@ class GladeGlGlade
     gl_config = Gdk::GLConfig.new(Gdk::GLConfig::MODE_DEPTH |
                                   Gdk::GLConfig::MODE_DOUBLE |
                                   Gdk::GLConfig::MODE_RGBA)
+
     width = 800
     height = 600
     fov = 90.0
@@ -164,7 +193,7 @@ end
 # Main program
 if __FILE__ == $0
   # Set values as your own application. 
-  PROG_PATH = "glade-gl.glade"
+  PROG_PATH = "gui.glade"
   PROG_NAME = "YOUR_APPLICATION_NAME"
   GladeGlGlade.new(PROG_PATH, nil, PROG_NAME)
   Gtk.main

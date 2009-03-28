@@ -4,12 +4,11 @@ module View
 
 class Gl_screen
 
-  attr_reader :screen, :width, :height
+  attr_reader :width, :height
 
-  def initialize(window)
-    @width = window.width
-    @height = window.height
-    @screen = window.screen  
+  def initialize(width,height)
+    @width = width
+    @height = height
     init_view()
   end
 

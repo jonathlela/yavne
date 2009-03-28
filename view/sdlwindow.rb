@@ -23,6 +23,10 @@ class SDL_window
     return SDL.setVideoMode(@width,@height,@bpp,SDL::OPENGL)  
   end
 
+  def gl_swap()
+    SDL.GLSwapBuffers()
+  end
+
 end
 
 end

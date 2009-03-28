@@ -22,11 +22,12 @@ class Gui
   
   attr_reader :is_finished, :renderables
 
-  def initialize(controller)
+  def initialize(controller,window)
     @controller = Controller.new(controller,self)
     @is_finished = false
-    @window = SDL_window.new(800,600,16)
-    @render = Gl_screen.new(@window)
+    @window = window
+    @screen = View::Gl_screen.new(@window.width,@window.height)
+    @render = Gl_screen.new(@window.width,@window.height)
     @mediatracker = MediaTracker.new()
     @positionner = Positionner.new(@render,@mediatracker)
     @texturemanager = TextureManager.new()
@@ -36,7 +37,7 @@ class Gui
     SDL::Mixer.open(44100, SDL::Mixer::DEFAULT_FORMAT, 2, 1024)
     @fps = 0    
     @last_fps = SDL::get_ticks()/1000
-    @fps_timer = Timer.new(0)
+    @fps_timer = Timer.new(100)
     @event_timer = Timer.new(1000)
     @pollevent = PollEvent.new()
     @step = 0
@@ -170,13 +171,17 @@ class Gui
     @renderables.each { |elt|
       render_element(elt)
     }
-    SDL.GLSwapBuffers()
+    @window.gl_swap()
   end
 
   def main()
-    while @is_finished do
+    loop = Thread.new {
+    while !@is_finished do
       run()
+      Thread.pass
     end
+    }
+    loop.join
   end
 
 end
