@@ -1,0 +1,79 @@
+General
+==============================================================================
+Files must be encoded in UTF-8
+No more than 77 characters including white space per line.
+File must contain only one class definition, filename must be the class name
+in lowercase.
+
+Header
+==============================================================================
+Files shall begin by specifing the encoding (utf-8).
+This example shows a way to specify the encoding compatible with ruby 1.9 and
+emacs
+
+------------------------------------------------------------------------------
+# -*- encoding: utf-8 -*-
+------------------------------------------------------------------------------
+
+It must be followed the RDOC (http://rdoc.sourceforge.net/) meta information 
+of the document (authors, copyright and license). Example :
+
+------------------------------------------------------------------------------
+# Author::    Jonathan Marchand  (mailto:first_name.last_name@azubato.net)
+# Copyright:: Copyright (c) 2006 Jérémy Marchand & Jonathan Marchand
+# License::   GNU General Public License (GPL) version 2
+------------------------------------------------------------------------------
+
+It shall be followed by a copy of the license (comments must be escaped from 
+RDoc, use #-- and #++)
+
+Finally, specify the encoding to make it compatible with ruby 1.8
+
+------------------------------------------------------------------------------
+$KCODE = "UTF-8"
+------------------------------------------------------------------------------
+
+Requires
+==============================================================================
+First requires must load ruby standard ruby libraries and extensions. They
+should be adressed within simple quotes and without their extensions.
+
+Then requires shall load local files from the project. They should be adressed
+within double quotes with their extensions.
+
+Identifier naming convention
+==============================================================================
+Multi-word identifiers shall use the underscore to delimit boundaries between
+words.
+
+Identifiers shall not use capitalized letters except :
+
+  - class (first letter is capitalized)
+  - constants are fully capitalized
+
+Syntax
+==============================================================================
+One statement per line.
+
+Don't use the semi-colon as a statement separator, use the carriage return.
+
+Indent your code with two spaces per logical level. Furthermore, never use
+tabs, which includes the practice of mixing tabs with spaces. 
+
+Put a single blank line between each method definition.
+
+Document your libraries using RDoc (http://rdoc.sourceforge.net/).
+
+Strings should be within double quotes.
+
+Never omit the parentheses between a method name and its parameter list even 
+if it's empty. Exceptions are Kernel#require, Module#include, Kernel#p and
+the attr_* methods.
+
+All blocks must be constructed with braces ({})
+
+Control structures shall use their long denotations :
+
+  - if ... then ... elsif ... then ... else ... end
+  - while ... do ... end 
+  - for ... in ... do ... end
