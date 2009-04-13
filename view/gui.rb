@@ -24,9 +24,11 @@ class Gui
 
   def initialize(controller,window)
     @controller = Controller.new(controller,self)
-    @is_finished = false
     @window = window
-    @screen = View::Gl_screen.new(@window.width,@window.height)
+  end
+
+  def init()
+    @is_finished = false
     @render = Gl_screen.new(@window.width,@window.height)
     @mediatracker = MediaTracker.new()
     @positionner = Positionner.new(@render,@mediatracker)
@@ -167,7 +169,8 @@ class Gui
   def render()
     GL.MatrixMode(GL::MODELVIEW)     
     GL.LoadIdentity()
-    GL.Clear(GL::COLOR_BUFFER_BIT)
+    GL.Clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT)
+    GL.LoadIdentity()
     @renderables.each { |elt|
       render_element(elt)
     }
@@ -175,13 +178,9 @@ class Gui
   end
 
   def main()
-    loop = Thread.new {
     while !@is_finished do
       run()
-      Thread.pass
     end
-    }
-    loop.join
   end
 
 end

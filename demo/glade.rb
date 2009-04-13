@@ -2,6 +2,9 @@
 
 $LOAD_PATH << File.expand_path(File.dirname(__FILE__)+ "/..")
 
+require 'gtk2'
+require 'monitor'
+
 require 'gtkglext'
 require 'libglade2'
 
@@ -86,12 +89,14 @@ class GLDrawingArea < Gtk::DrawingArea
     ## Create an OpenGL renderer instance.
     #@render = GLRender.new(fov)
 
-    data = Model::ModelFactory.createFromFile("../demo/game.xml")
-    controller = Controller::Controller.new(data)
+    @data = Model::ModelFactory.createFromFile("../demo/game.xml")
+    @controller = Controller::Controller.new(@data)
 
     ##Signal handler for drawing area initialisation.
     signal_connect_after("realize") do
-      @app.main()
+      gl_begin {@app.init()}
+      @app.update_state(@data.state)
+      gl_begin {@app.run()}
     end
 
     ## Signal handler for drawing area reshapes.
@@ -115,9 +120,8 @@ class GLDrawingArea < Gtk::DrawingArea
     signal_connect_after("button_press_event") { button_press_event() }
     signal_connect_after("button_release_event") { button_release_event() }
 
-    @app = View::Gui.new(controller,self)
-    controller.view = @app
-    @app.update_state(data.state)
+    @app = View::Gui.new(@controller,self)
+    @controller.view = @app
   end
 
   def gl_begin()
@@ -139,6 +143,11 @@ class GLDrawingArea < Gtk::DrawingArea
     puts "button_release_event"
     true
   end
+
+  def update()
+    gl_begin {@app.main()}
+  end
+
 end
 
 class GladeGlGlade
@@ -153,7 +162,7 @@ class GladeGlGlade
 
     ## Obtain a valid OpenGL context configuration.
     gl_config = Gdk::GLConfig.new(Gdk::GLConfig::MODE_DEPTH |
-                                  Gdk::GLConfig::MODE_DOUBLE |
+                                  #Gdk::GLConfig::MODE_DOUBLE |
                                   Gdk::GLConfig::MODE_RGBA)
 
     width = 800

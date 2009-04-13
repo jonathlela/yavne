@@ -11,6 +11,6 @@ controller = Controller::Controller.new(data)
 window = View::SDL_window.new(800,600,16)
 app = View::Gui.new(controller,window)
 controller.view = app
+app.init()
 app.update_state(data.state)
-
 app.main()
