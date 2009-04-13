@@ -2,9 +2,6 @@
 
 $LOAD_PATH << File.expand_path(File.dirname(__FILE__)+ "/..")
 
-require 'gtk2'
-require 'monitor'
-
 require 'gtkglext'
 require 'libglade2'
 
@@ -13,6 +10,7 @@ require "data/modelfactory.rb"
 require "controller/controller.rb"
 require "view/sdlwindow.rb"
 require "view/gui.rb"
+require "view/image.rb"
 
 ## -----------------------------------------------------------------------------
 ## A generic class for OpenGL application functions.
@@ -78,6 +76,86 @@ class GLDrawingArea < Gtk::DrawingArea
 
   attr_reader :width, :height
 
+  def init_ex ()
+    GL.ShadeModel(GL::SMOOTH)
+    GL.Enable(GL::DEPTH_TEST)
+    GL.DepthFunc(GL::LEQUAL)
+    GL.ClearColor(0.0, 0.0, 0.0, 0.0)
+    GL.Hint(GL::PERSPECTIVE_CORRECTION_HINT, GL::NICEST)
+  end
+
+  def init ()
+    GL.MatrixMode(GL::PROJECTION)
+    GL.LoadIdentity()
+    GL.Ortho(0,@width,@height,0,-100,100)
+    GL.MatrixMode(GL::MODELVIEW)     
+    GL.LoadIdentity()
+    GL.ClearColor(0.0,0.0,0.0,1.0)
+    GL.BlendFunc(GL::SRC_ALPHA,GL::ONE_MINUS_SRC_ALPHA)
+    GL.Enable(GL::BLEND)
+    GL.GenTextures(1)
+  end
+
+  def render_image_ex ()
+    i = 0
+    w = @image.w
+    h = @image.h
+    x = 0
+    y = 0
+
+
+    GL.Clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT)
+    GL.LoadIdentity()  
+
+    ## Scene view translation. ---------------------------------------------->>>
+    GL.Translate(0.0, 0.0, -1.0)
+    GL.Rotate(0.0, 0.0, 0.0, 0.0)
+    ## -------------------------------------------------------------------------
+
+    ## Scene Rendering Code ------------------------------------------------->>>
+    GL.Begin(GL::TRIANGLES)
+      GL.Color3f(0, 0, 1)
+      GL.Vertex2f(-1, -1)
+      GL.Color3f(0, 1, 0)
+      GL.Vertex2f(1, 1)
+      GL.Color3f(1, 0, 0)
+      GL.Vertex2f(1, -1)
+    GL.End()
+
+    GL.Flush()
+
+  end
+
+  def render_image ()
+    i = 0
+    w = @image.w
+    h = @image.h
+    x = 0
+    y = 0
+
+    GL.MatrixMode(GL::MODELVIEW)     
+    GL.LoadIdentity()
+    GL.Clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT)
+    GL.LoadIdentity()
+
+    GL.Enable(GL::TEXTURE_2D)
+    GL.PushMatrix()
+    GL.BindTexture(GL::TEXTURE_2D,i)
+    GL.Begin(GL::QUADS)
+    GL.Color4f(1.0,1.0,1.0,1.0)
+    GL.TexCoord(0,0)
+    GL.Vertex(x,y,0)
+    GL.TexCoord(1,0)
+    GL.Vertex(x+w,y,0)
+    GL.TexCoord(1,1)
+    GL.Vertex(x+w,y+h,0)
+    GL.TexCoord(0,1)
+    GL.Vertex(x,y+h,0)
+    GL.End()
+    GL.PopMatrix()
+    GL.Disable(GL::TEXTURE_2D)
+  end
+  
   def initialize(width, height, fov, gl_config)
     super()
     set_size_request(width, height)
@@ -86,17 +164,19 @@ class GLDrawingArea < Gtk::DrawingArea
     @width = width
     @height = height
 
-    ## Create an OpenGL renderer instance.
-    #@render = GLRender.new(fov)
+    @image = View::Image.new("images/Beach time.png")
+    @image.texturize(0)
 
     @data = Model::ModelFactory.createFromFile("../demo/game.xml")
     @controller = Controller::Controller.new(@data)
 
     ##Signal handler for drawing area initialisation.
     signal_connect_after("realize") do
-      gl_begin {@app.init()}
-      @app.update_state(@data.state)
-      gl_begin {@app.run()}
+      init()
+      #init_ex()
+      #gl_begin {@app.init()}
+      #@app.update_state(@data.state)
+      #gl_begin {@app.run()}
     end
 
     ## Signal handler for drawing area reshapes.
@@ -104,11 +184,15 @@ class GLDrawingArea < Gtk::DrawingArea
     #  gl_begin() { @render.resize(allocation.width, allocation.height) }
     #end
 
-    ## Signal handler for drawing area expose events.
-    #signal_connect_after("expose_event") do
-    #  gl_begin() do
-    #    @render.draw()
-    #  end
+    # Signal handler for drawing area expose events.
+    signal_connect_after("expose_event") do
+      gl_begin() do
+        render_image()
+        #render_image_ex()
+        #@render.draw()
+        gl_swap()
+      end
+    end
 
     #  gl_drawable.swap_buffers() if gl_drawable.double_buffered?
     #end
@@ -144,9 +228,9 @@ class GLDrawingArea < Gtk::DrawingArea
     true
   end
 
-  def update()
-    gl_begin {@app.main()}
-  end
+  #def update()
+  #  gl_begin {@app.main()}
+  #end
 
 end
 
@@ -162,7 +246,7 @@ class GladeGlGlade
 
     ## Obtain a valid OpenGL context configuration.
     gl_config = Gdk::GLConfig.new(Gdk::GLConfig::MODE_DEPTH |
-                                  #Gdk::GLConfig::MODE_DOUBLE |
+                                  Gdk::GLConfig::MODE_DOUBLE |
                                   Gdk::GLConfig::MODE_RGBA)
 
     width = 800
