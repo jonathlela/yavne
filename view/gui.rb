@@ -30,6 +30,7 @@ class Gui
   def init()
     @is_finished = false
     @render = Gl_screen.new(@window.width,@window.height)
+    @render.init_view()
     @mediatracker = MediaTracker.new()
     @positionner = Positionner.new(@render,@mediatracker)
     @texturemanager = TextureManager.new()
@@ -137,6 +138,17 @@ class Gui
     end
   end
 
+  def button_press()
+        event = SDL::Event2::MouseButtonUp.new()
+      event.button = SDL::Mouse::BUTTON_LEFT
+      event.press = true
+      event.x = 0
+      event.y = 0
+      p "event : " + event.to_s
+    p SDL::Event2.appState
+      SDL::Event2.push(event) 
+  end
+
   def handle_sdl_event()
     while event = SDL::Event2.poll
       if event.kind_of?(SDL::Event2::Quit)
@@ -156,6 +168,7 @@ class Gui
       }
     else
       i = @texturemanager.get(element)
+      element.texturize(i)
       element.render(i)
     end
   end
@@ -167,8 +180,6 @@ class Gui
   end
 
   def render()
-    GL.MatrixMode(GL::MODELVIEW)     
-    GL.LoadIdentity()
     GL.Clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT)
     GL.LoadIdentity()
     @renderables.each { |elt|

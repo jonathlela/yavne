@@ -2,6 +2,7 @@
 
 $LOAD_PATH << File.expand_path(File.dirname(__FILE__)+ "/..")
 
+require 'sdl'
 require 'gtkglext'
 require 'libglade2'
 
@@ -101,8 +102,16 @@ class GLDrawingArea < Gtk::DrawingArea
     # Signal handler for drawing area expose events.
     signal_connect_after("expose_event") do
       gl_begin() do
-        gl_begin {@app.run()}
-        gl_swap()
+        GL.MatrixMode(GL::PROJECTION)
+        GL.LoadIdentity()
+        GL.Ortho(0,@width,@height,0,-100,100)
+        GL.MatrixMode(GL::MODELVIEW)     
+        GL.LoadIdentity()
+        GL.ClearColor(0.0,0.0,0.0,1.0)
+        GL.BlendFunc(GL::SRC_ALPHA,GL::ONE_MINUS_SRC_ALPHA)
+        GL.Enable(GL::BLEND)
+        GL.GenTextures(2)
+        gl_begin {Thread.new() {@app.main()}}
       end
     end
 
@@ -113,8 +122,10 @@ class GLDrawingArea < Gtk::DrawingArea
     add_events(Gdk::Event::BUTTON_PRESS_MASK |
                Gdk::Event::BUTTON_RELEASE_MASK)
 
-    signal_connect_after("button_press_event") { button_press_event() }
-    signal_connect_after("button_release_event") { button_release_event() }
+    signal_connect_after("button_press_event") {
+      @app.button_press()
+    }
+    #signal_connect_after("button_release_event") {  SDL::Event.push(SDL::Event.new())}
 
     @app = View::Gui.new(@controller,self)
     @controller.view = @app

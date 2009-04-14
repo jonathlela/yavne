@@ -9,7 +9,6 @@ class Gl_screen
   def initialize(width,height)
     @width = width
     @height = height
-    init_view()
   end
 
   def init_view()
