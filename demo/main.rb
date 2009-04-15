@@ -31,12 +31,14 @@ require "data/model.rb"
 require "data/modelfactory.rb"
 require "controller/controller.rb"
 require "view/sdlwindow.rb"
+require "view/sdlcontroller.rb"
 require "view/gui.rb"
 
 data = Model::ModelFactory.createFromFile("game.xml")
 controller = Controller::Controller.new(data)
 window = View::SDL_window.new(800,600,16)
-app = View::Gui.new(controller,window)
+control_event = View::SDL_controller.new()
+app = View::Gui.new(controller,window,control_event)
 controller.view = app
 app.init()
 app.init_view()

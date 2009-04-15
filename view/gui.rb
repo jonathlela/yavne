@@ -24,10 +24,10 @@ class Gui
   
   attr_reader :is_finished, :renderables
 
-  def initialize(controller,window)
+  def initialize(controller,window,control_event)
     @controller = Controller.new(controller,self)
     @window = window
-    @control_event = SDL_controller.new()
+    @control_event = control_event
   end
 
   def init()

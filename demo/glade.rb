@@ -13,66 +13,28 @@ require "view/sdlwindow.rb"
 require "view/gui.rb"
 require "view/image.rb"
 
-## -----------------------------------------------------------------------------
-## A generic class for OpenGL application functions.
-## -----------------------------------------------------------------------------
-class GLRender
-  attr_reader :fov
+class Gtk_controller
 
-  def initialize(fov = 90.0)
-    @fov = fov
+  def initialize ()
+    @queue = Array.new()
   end
 
-  ## Initialise OpenGL state for 3D rendering.
-  def init()
-    GL.ShadeModel(GL::SMOOTH)
-    GL.Enable(GL::DEPTH_TEST)
-    GL.DepthFunc(GL::LEQUAL)
-    GL.ClearColor(0.0, 0.0, 0.0, 0.0)
-    GL.Hint(GL::PERSPECTIVE_CORRECTION_HINT, GL::NICEST)
-    true
+  def push (event)
+    @queue.push(event)
   end
 
-  ## Resize OpenGL viewport.
-  def resize(width, height)
-    GL.Viewport(0, 0, width, height)
-
-    GL.MatrixMode(GL::PROJECTION)
-    GL.LoadIdentity()
-    GLU.Perspective(@fov, width.to_f() / height.to_f(), 0.1, 1024.0)
-    
-    GL.MatrixMode(GL::MODELVIEW)
-    GL.LoadIdentity()
+  def shift ()
+    return @queue.shift()
   end
 
-  ## Render OpenGL scene.
-  def draw()
-    GL.Clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT)
-    GL.LoadIdentity()
-
-    ## Scene view translation. ---------------------------------------------->>>
-    GL.Translate(0.0, 0.0, -1.0)
-    GL.Rotate(0.0, 0.0, 0.0, 0.0)
-    ## -------------------------------------------------------------------------
-
-    ## Scene Rendering Code ------------------------------------------------->>>
-    GL.Begin(GL::TRIANGLES)
-      GL.Color3f(0, 0, 1)
-      GL.Vertex2f(-1, -1)
-      GL.Color3f(0, 1, 0)
-      GL.Vertex2f(1, 1)
-      GL.Color3f(1, 0, 0)
-      GL.Vertex2f(1, -1)
-    GL.End()
-    ## -------------------------------------------------------------------------
-
-    GL.Flush()
+  def handle_event (queue)
+    while event = shift() do
+      queue.push(event)
+    end
   end
+  
 end
 
-## -----------------------------------------------------------------------------
-## A GtkDrawingArea widget with OpenGL rendering capabilities.
-## -----------------------------------------------------------------------------
 class GLDrawingArea < Gtk::DrawingArea
 
   attr_reader :width, :height
@@ -87,6 +49,7 @@ class GLDrawingArea < Gtk::DrawingArea
 
     @data = Model::ModelFactory.createFromFile("../demo/game.xml")
     @controller = Controller::Controller.new(@data)
+    @control_event = Gtk_controller.new()
 
     @run = false
 
@@ -124,11 +87,12 @@ class GLDrawingArea < Gtk::DrawingArea
                Gdk::Event::BUTTON_RELEASE_MASK)
 
     signal_connect_after("button_press_event") {
+      @control_event.push(View::Mouse_button_pressed.new())
       button_press_event()
     }
     #signal_connect_after("button_release_event") {  SDL::Event.push(SDL::Event.new())}
 
-    @app = View::Gui.new(@controller,self)
+    @app = View::Gui.new(@controller,self,@control_event)
     @controller.view = @app
   end
 
