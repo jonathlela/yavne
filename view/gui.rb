@@ -43,7 +43,7 @@ class Gui
     @fps = 0    
     @last_fps = SDL::get_ticks()/1000
     @fps_timer = Timer.new(100)
-    @event_timer = Timer.new(1000)
+    @event_timer = Timer.new(100)
     @pollevent = PollEvent.new()
     @control2_event = EventQueue.new()
     @step = 0

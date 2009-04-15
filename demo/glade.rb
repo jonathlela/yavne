@@ -55,9 +55,7 @@ class GLDrawingArea < Gtk::DrawingArea
 
     ##Signal handler for drawing area initialisation.
     signal_connect_after("realize") do
-      p "realize"
       @app.init()
-      p "realize2"
     end
 
     ## Signal handler for drawing area reshapes.
@@ -68,14 +66,12 @@ class GLDrawingArea < Gtk::DrawingArea
     # Signal handler for drawing area expose events.
     signal_connect_after("expose_event") do
       gl_begin() do
-        p "expose"
         if !@run then
           @app.update_state(@data.state)
           @app.init_view()
           Thread.new() {@app.main()}
           @run = true
         end
-        p "expose2"
       end
     end
 

@@ -15,7 +15,7 @@ module View
       end
       now = SDL.get_ticks()
       @next = now + @frame_interval
-      @sleep_time = 0
+      @sleep_time = 0 #@frame_interval / 1000
 
     end
     
