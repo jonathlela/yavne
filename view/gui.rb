@@ -122,7 +122,7 @@ class Gui
       @fps = @fps + 1
       now = SDL::get_ticks()/1000
       if now != @last_fps then
-        SDL::WM.setCaption(@fps.to_s,"")
+        @window.set_caption(@fps.to_s)
         @last_fps = now
         @fps = 0
       end

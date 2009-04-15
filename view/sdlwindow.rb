@@ -27,6 +27,10 @@ class SDL_window
     SDL.GLSwapBuffers()
   end
 
+  def set_caption (fps)
+    SDL::WM.setCaption(fps,"")
+  end
+
 end
 
 end

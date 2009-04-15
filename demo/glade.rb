@@ -116,6 +116,10 @@ class GLDrawingArea < Gtk::DrawingArea
     true
   end
 
+  def set_caption (fps)
+    parent.parent.title = fps
+  end
+
 end
 
 class GladeGlGlade
