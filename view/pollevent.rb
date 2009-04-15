@@ -1,19 +1,17 @@
 module View
 
-  class PollEvent
+  class PollEvent    
 
-    
-
-    def initialize()
+    def initialize ()
       @poll = Array.new()
     end
 
-    def push(event)
+    def push (event)
       @poll.push(event)
     end
 
-    def poll()
-      @poll.shift()
+    def poll ()
+      return @poll.shift()
     end
 
   end

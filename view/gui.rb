@@ -11,7 +11,9 @@ require "view/timer.rb"
 require "view/time.rb"
 require "view/texturemanager.rb"
 require "view/pollevent.rb"
+require "view/control_event.rb"
 require "view/event.rb"
+require "view/sdlcontroller.rb"
 
 
 $KCODE="UTF8"
@@ -25,12 +27,12 @@ class Gui
   def initialize(controller,window)
     @controller = Controller.new(controller,self)
     @window = window
+    @control_event = SDL_controller.new()
   end
 
   def init()
     @is_finished = false
     @render = Gl_screen.new(@window.width,@window.height)
-    @render.init_view()
     @mediatracker = MediaTracker.new()
     @positionner = Positionner.new(@render,@mediatracker)
     @texturemanager = TextureManager.new()
@@ -43,7 +45,12 @@ class Gui
     @fps_timer = Timer.new(100)
     @event_timer = Timer.new(1000)
     @pollevent = PollEvent.new()
+    @control2_event = EventQueue.new()
     @step = 0
+  end
+
+  def init_view ()
+    @render.init_view()
   end
  
   def update_time(elt)
@@ -109,7 +116,7 @@ class Gui
     handle_event()
     if @event_timer.render?() then
       handle_event()
-      handle_sdl_event()
+      handle_control_event()
     end
     if @fps_timer.render?() then
       @fps = @fps + 1
@@ -138,25 +145,15 @@ class Gui
     end
   end
 
-  def button_press()
-        event = SDL::Event2::MouseButtonUp.new()
-      event.button = SDL::Mouse::BUTTON_LEFT
-      event.press = true
-      event.x = 0
-      event.y = 0
-      p "event : " + event.to_s
-    p SDL::Event2.appState
-      SDL::Event2.push(event) 
-  end
-
-  def handle_sdl_event()
-    while event = SDL::Event2.poll
-      if event.kind_of?(SDL::Event2::Quit)
+  def handle_control_event ()
+    @control_event.handle_event(@control2_event)
+    while event = @control2_event.fetch() do
+      if event.type == Control_event::MOUSE_BUTTON_PRESSED then
+        @controller.on_click()
+      end
+      if event.type == Control_event::QUIT then
         @is_finished = true
         exit
-      end
-      if event.kind_of?(SDL::Event2::MouseButtonDown)
-        @controller.on_click()
       end
     end
   end

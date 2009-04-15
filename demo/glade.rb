@@ -88,10 +88,14 @@ class GLDrawingArea < Gtk::DrawingArea
     @data = Model::ModelFactory.createFromFile("../demo/game.xml")
     @controller = Controller::Controller.new(@data)
 
+    @run = false
+
     ##Signal handler for drawing area initialisation.
     signal_connect_after("realize") do
+      p "realize"
       @app.init()
       @app.update_state(@data.state)
+      p "realize2"
     end
 
     ## Signal handler for drawing area reshapes.
@@ -102,16 +106,13 @@ class GLDrawingArea < Gtk::DrawingArea
     # Signal handler for drawing area expose events.
     signal_connect_after("expose_event") do
       gl_begin() do
-        GL.MatrixMode(GL::PROJECTION)
-        GL.LoadIdentity()
-        GL.Ortho(0,@width,@height,0,-100,100)
-        GL.MatrixMode(GL::MODELVIEW)     
-        GL.LoadIdentity()
-        GL.ClearColor(0.0,0.0,0.0,1.0)
-        GL.BlendFunc(GL::SRC_ALPHA,GL::ONE_MINUS_SRC_ALPHA)
-        GL.Enable(GL::BLEND)
-        GL.GenTextures(2)
-        gl_begin {Thread.new() {@app.main()}}
+        p "expose"
+        if !@run then
+        @app.init_view()
+        Thread.new() {@app.main()}
+          @run = true
+        end
+        p "expose2"
       end
     end
 
@@ -123,7 +124,7 @@ class GLDrawingArea < Gtk::DrawingArea
                Gdk::Event::BUTTON_RELEASE_MASK)
 
     signal_connect_after("button_press_event") {
-      @app.button_press()
+      button_press_event()
     }
     #signal_connect_after("button_release_event") {  SDL::Event.push(SDL::Event.new())}
 
@@ -150,10 +151,6 @@ class GLDrawingArea < Gtk::DrawingArea
     puts "button_release_event"
     true
   end
-
-  #def update()
-  #  gl_begin {@app.main()}
-  #end
 
 end
 
@@ -201,7 +198,6 @@ class GladeGlGlade
     widget.destroy()
     Gtk.main_quit()
   end
-
   
 end
 
@@ -212,5 +208,5 @@ if __FILE__ == $0
   PROG_PATH = "gui.glade"
   PROG_NAME = "YOUR_APPLICATION_NAME"
   GladeGlGlade.new(PROG_PATH, nil, PROG_NAME)
-  Gtk.main
+  Gtk.main()
 end
