@@ -56,8 +56,7 @@ class GLDrawingArea < Gtk::DrawingArea
     ##Signal handler for drawing area initialisation.
     signal_connect_after("realize") do
       p "realize"
-      @app.init()
-      @app.update_state(@data.state)
+      @app.init()+
       p "realize2"
     end
 
@@ -71,8 +70,9 @@ class GLDrawingArea < Gtk::DrawingArea
       gl_begin() do
         p "expose"
         if !@run then
-        @app.init_view()
-        Thread.new() {@app.main()}
+          @app.update_state(@data.state)
+          @app.init_view()
+          Thread.new() {@app.main()}
           @run = true
         end
         p "expose2"
@@ -116,7 +116,7 @@ class GLDrawingArea < Gtk::DrawingArea
     true
   end
 
-  def set_caption (fps)
+    def set_caption (fps)
     parent.parent.title = fps
   end
 

@@ -20,7 +20,7 @@ class Gl_screen
     GL.ClearColor(0.0,0.0,0.0,1.0)
     GL.BlendFunc(GL::SRC_ALPHA,GL::ONE_MINUS_SRC_ALPHA)
     GL.Enable(GL::BLEND)
-    GL.GenTextures(2)
+    GL.GenTextures(4)
   end
 
 end

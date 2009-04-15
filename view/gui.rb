@@ -165,7 +165,6 @@ class Gui
       }
     else
       i = @texturemanager.get(element)
-      element.texturize(i)
       element.render(i)
     end
   end
