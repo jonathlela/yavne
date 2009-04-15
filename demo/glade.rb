@@ -56,7 +56,7 @@ class GLDrawingArea < Gtk::DrawingArea
     ##Signal handler for drawing area initialisation.
     signal_connect_after("realize") do
       p "realize"
-      @app.init()+
+      @app.init()
       p "realize2"
     end
 
