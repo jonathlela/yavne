@@ -43,10 +43,10 @@ module Model
       @environment = env
     end
     
-    # 
+    # Given a state, get the following one in the game's graph. 
 
     def next_state (state)
-      state.next(@environment)
+      state.next_state(@environment)
     end
     
   end

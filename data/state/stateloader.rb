@@ -11,7 +11,7 @@ module Model
 
   class StateLoader
 
-    def check_file(path,directory)
+    def check_file (path,directory)
       path = Pathname.new(path)
       directory = Pathname.new(directory)
       if !path.absolute? then

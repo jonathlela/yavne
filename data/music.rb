@@ -29,7 +29,7 @@ require "data/element.rb"
 
 module Model
 
-  # A Music
+  # A Music is an Element bound to a music
 
   class Music < SingleElement
 
@@ -37,7 +37,7 @@ module Model
 
     attr_reader :path, :loops
 
-    def initialize(path,loops=INFINITE_LOOP,time=Element::NO_TIME)
+    def initialize (path, loops=INFINITE_LOOP, time=Element::NO_TIME)
       super(time)
       @path = path
       @loops = loops

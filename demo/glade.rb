@@ -1,19 +1,41 @@
-#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+
+# Author::    Jonathan Marchand  (mailto:first_name.last_name@azubato.net)
+# Copyright:: Copyright (c) 2006-2009 Jérémy Marchand & Jonathan Marchand
+# License::   GNU General Public License (GPL) version 3
+
+#--###########################################################################
+# YAVNE - Yet Another Visual Novel Editor                                    #
+# Copyright © 2008-2009 Jérémy Marchand & Jonathan Marchand                  #
+# Mails : first_name.last_name@azubato.net                                   #
+#                                                                            #
+# YAVNE is free software: you can redistribute it and/or modify              #
+# it under the terms of the GNU General Public License as published by       #
+# the Free Software Foundation, either version 3 of the License, or          #
+# (at your option) any later version.                                        #
+#                                                                            #
+# YAVNE is distributed in the hope that it will be useful,                   #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of             #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              #
+# GNU General Public License for more details.                               #
+#                                                                            #
+# You should have received a copy of the GNU General Public License          #
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.      #
+############################################################################++
+
+$KCODE = "UTF-8"
 
 $LOAD_PATH << File.expand_path(File.dirname(__FILE__)+ "/..")
 
-require 'sdl'
 require 'gtkglext'
 require 'libglade2'
 
 require "data/model.rb"
 require "data/modelfactory.rb"
 require "controller/controller.rb"
-require "view/sdlwindow.rb"
 require "view/gui.rb"
-require "view/image.rb"
 
-class Gtk_controller
+class Gtk_control_event_queue
 
   def initialize ()
     @queue = Array.new()
@@ -39,7 +61,7 @@ class GLDrawingArea < Gtk::DrawingArea
 
   attr_reader :width, :height
   
-  def initialize(width, height, fov, gl_config)
+  def initialize (width, height, gl_config)
     super()
     set_size_request(width, height)
     set_gl_capability(gl_config)
@@ -49,70 +71,53 @@ class GLDrawingArea < Gtk::DrawingArea
 
     @data = Model::ModelFactory.createFromFile("../demo/game.xml")
     @controller = Controller::Controller.new(@data)
-    @control_event = Gtk_controller.new()
+    @control_event_queue = Gtk_control_event_queue.new()
 
     @run = false
 
     ##Signal handler for drawing area initialisation.
-    signal_connect_after("realize") do
+    signal_connect_after("realize") {
       @app.init()
-    end
-
-    ## Signal handler for drawing area reshapes.
-    #signal_connect_after("configure_event") do
-    #  gl_begin() { @render.resize(allocation.width, allocation.height) }
-    #end
+    }
 
     # Signal handler for drawing area expose events.
-    signal_connect_after("expose_event") do
-      gl_begin() do
+    signal_connect_after("expose_event") {
+      gl_begin() {
         if !@run then
           @app.update_state(@data.state)
           @app.init_view()
           Thread.new() {@app.main()}
           @run = true
         end
-      end
-    end
-
-    #  gl_drawable.swap_buffers() if gl_drawable.double_buffered?
-    #end
+      }
+    }
 
     ## Add mouse button press/release signal event handlers
     add_events(Gdk::Event::BUTTON_PRESS_MASK |
                Gdk::Event::BUTTON_RELEASE_MASK)
 
     signal_connect_after("button_press_event") {
-      @control_event.push(View::Mouse_button_pressed.new())
-      button_press_event()
+      @control_event_queue.push(View::Mouse_button_pressed.new())
     }
-    #signal_connect_after("button_release_event") {  SDL::Event.push(SDL::Event.new())}
+    signal_connect_after("button_release_event") { 
+       @control_event_queue.push(View::Mouse_button_released.new())
+    }
 
-    @app = View::Gui.new(@controller,self,@control_event)
+    @app = View::Gui.new(@controller,self,@control_event_queue)
     @controller.view = @app
   end
 
-  def gl_begin()
+  def gl_begin ()
     gl_drawable.gl_begin(gl_context) { yield }
   end
 
-  def gl_swap()
+  def gl_swap ()
     if gl_drawable.double_buffered? then
       gl_drawable.swap_buffers()
     end
   end
 
-  def button_press_event()
-    puts "button_press_event"
-    true
-  end
-
-  def button_release_event()
-    puts "button_release_event"
-    true
-  end
-
-    def set_caption (fps)
+  def set_caption (fps)
     parent.parent.title = fps
   end
 
@@ -123,7 +128,8 @@ class GladeGlGlade
 
   attr :glade
   
-  def initialize(path_or_data, root = nil, domain = nil, localedir = nil, flag = GladeXML::FILE)
+  def initialize (path_or_data, root = nil, domain = nil, localedir = nil, 
+                  flag = GladeXML::FILE)
     ## Initialise Gtk[GLExt] library.
     Gtk.init()
     Gtk::GL.init()
@@ -135,29 +141,39 @@ class GladeGlGlade
 
     width = 800
     height = 600
-    fov = 90.0
     
     ## Glade
     bindtextdomain(domain, localedir, nil, "UTF-8")
-    @glade = GladeXML.new(path_or_data, root, domain, localedir, flag) {|handler| method(handler)}
+    @glade = GladeXML.new(path_or_data, root, domain, localedir, flag) {
+      |handler| method(handler)
+    }
 
-    @area = @glade.get_widget("vbox1")
-    @gl_area = GLDrawingArea.new(width, height, fov, gl_config)
+    @area = @glade.get_widget("vbox")
+    @gl_area = GLDrawingArea.new(width, height, gl_config)
     @area.add(@gl_area)
     @area.show_all()
   end
 
-  def on_window1_key_press_event(widget, arg0)
+  def on_window_key_press_event (widget, arg0)
     puts "key_press_event"
     true
   end
 
-  def on_window1_key_release_event(widget, arg0)
+  def on_window_key_release_event (widget, arg0)
     puts "key_release_event"
     true
   end
 
-  def on_window1_delete_event(widget, arg0)
+  def on_about_activate (widget)
+    @glade.get_widget("aboutdialog").show
+  end
+
+  def on_quit_activate (widget)
+    puts "Closing application."
+    Gtk.main_quit()
+  end
+
+  def on_window_delete_event (widget, arg0)
     puts "Closing application."
     widget.destroy()
     Gtk.main_quit()

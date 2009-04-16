@@ -8,7 +8,7 @@ module View
     
     attr_reader :box, :texts
 
-    def initialize(box,paragraphs,interline=0)
+    def initialize(box, paragraphs, interline=0)
       super()
       @box = box
       @w = @box.w
@@ -36,29 +36,29 @@ module View
       @render_elements = [@box] + @viewable_texts
     end
 
-    def dichotomic(arr,test)
+    def dichotomic(arr, &test)
       if arr.size() == 1 then
         return 0
       else
-        def loop(test,i,min,max)
-          if test[i] then
+        loop = lambda { |i, min, max|
+          if test.call(i) then
             if i == max - 1 then
               return i
             else
               new_i = (max-i)/2 + i
-              loop(test,new_i,i,max)
+              loop.call(new_i, i, max)
             end
           else
             if i == 0 then
               return i
             else
               new_i = (i-min)/2 + min
-              loop(test,new_i,min,i)
+              loop.call(new_i, min, i)
             end
           end
-        end
+        }
+        loop.call((arr.size()-1), 0, arr.size())
       end
-      loop(test,(arr.size()-1),0,arr.size())
     end
     
     def convertParagraphToTextLinesFittingBoxWidth(paragraph)
@@ -67,19 +67,20 @@ module View
           text=words[0..i].join(" ")
           w,h = Text::text_size(text,paragraph.font,paragraph.size)
           return w <= @box.w - @leftmargin - @rightmargin
-        }}
+        }
+      }
       words = paragraph.text.split
-      def findLongestTextsComplyingToCondition(condition,words,paragraph, textLines)
+      findLongestTextsComplyingToCondition = lambda { |condition, words, paragraph, textLines|
         if !words.empty? then
-          cand = dichotomic(words,condition[words])
+          cand = dichotomic(words, &condition.call(words))
           text = words[0..cand].join(" ")
           textLines.push(text)
           if cand < words.size() - 1 then
-            findLongestTextsComplyingToCondition(condition,words[(cand+1)..(words.size()-1)],paragraph, textLines)
+            findLongestTextsComplyingToCondition.call(condition,words[(cand+1)..(words.size()-1)],paragraph, textLines)
           end
         end
-      end
-      findLongestTextsComplyingToCondition(renderedLineIsShorterThanTextBox,words,paragraph,textLines)
+      }
+      findLongestTextsComplyingToCondition.call(renderedLineIsShorterThanTextBox,words,paragraph,textLines)
       return textLines
     end
 
@@ -91,10 +92,11 @@ module View
           }
           height = lines_height + ((i-1)* @interline) + @topmargin + @bottommargin
           return height < @box.h
-        }}
+        }
+      }
       if @texts[@cursor] != nil then
         arr = @texts[@cursor..(@texts.size()-1)]
-        cand = dichotomic(arr,test[arr])
+        cand = dichotomic(arr,&test[arr])
         @cursor = cand + 1
         @viewable_texts = arr[0..cand]
         @rendered = cand >= (arr.size()-1)

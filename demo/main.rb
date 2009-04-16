@@ -34,15 +34,15 @@ require "view/sdlwindow.rb"
 require "view/sdlcontroller.rb"
 require "view/gui.rb"
 
-data = Model::ModelFactory.createFromFile("game.xml")
+data = Model::ModelFactory.create_from_file("game.xml")
 controller = Controller::Controller.new(data)
 window = View::SDL_window.new(800,600,16)
-control_event = View::SDL_controller.new()
-app = View::Gui.new(controller,window,control_event)
+control_event_queue = View::SDL_controller.new()
+app = View::Gui.new(controller,window,control_event_queue)
 controller.view = app
 app.init()
-app.init_view()
 app.update_state(data.state)
+app.init_view()
 app.main()
 
 
