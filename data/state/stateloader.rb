@@ -177,7 +177,7 @@ module Model
     def get_scenes (scenes)
       res = Hash.new()
       scenes.each_element("scene") { |scene|
-        state = createState()
+        state = create_state()
         scene.each_element { |element|
           case element.name
           when "background"
