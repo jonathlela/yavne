@@ -25,26 +25,27 @@
 
 $KCODE = "UTF-8"
 
-require "data/element.rb"
+require "data/element/single_element.rb"
+require "data/positionnable.rb"
 
 module Model
 
-  class Text < SingleElement
-    
-    attr_reader :text, :color, :font, :size
+  # An Image is an Element bound to an image
+
+  class Image < SingleElement
 
     include Positionnable
     
-    def initialize (text, color, font, size, time=Element::NO_TIME)
+    attr_reader :path
+    
+    def initialize (path,time=Element::NO_TIME)
       super(time)
-      @text = text
-      @color = color
-      @font = font
-      @size = size
-      @type = "text"
+      left()
+      top()
+      @path = path
+      @type = "image"
     end
     
   end
-
   
 end

@@ -23,25 +23,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.      #
 ############################################################################++
 
-$KCODE = "UTF-8"
-
-require "data/element.rb"
+require "data/element/single_element.rb"
 
 module Model
 
-  # A Music is an Element bound to a music
-
-  class Music < SingleElement
-
-    INFINITE_LOOP = "infinite loop"
+  class Sound < SingleElement
 
     attr_reader :path, :loops
 
-    def initialize (path, loops=INFINITE_LOOP, time=Element::NO_TIME)
+    INFINITE_LOOP = "infinite loop"
+
+    def initialize (path,loops=0, time=Element::NO_TIME)
       super(time)
       @path = path
       @loops = loops
-      @type = "music"
+      @type = "sound"
     end
 
   end

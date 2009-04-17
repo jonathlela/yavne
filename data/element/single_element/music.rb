@@ -25,27 +25,23 @@
 
 $KCODE = "UTF-8"
 
+require "data/element/single_element.rb"
+
 module Model
 
-  # An Element is the basic type of the different elemnts in a game
+  # A Music is an Element bound to a music
 
-  class Element
-    
-    NO_TIME = "notime"
-    
-    @@ids = 0
+  class Music < SingleElement
 
-    attr_reader :type, :id
+    INFINITE_LOOP = "infinite loop"
 
-    def initialize ()
-      @@ids += 1
-      @id = @@ids
-    end
-    
-    # Tell if an Element is single or made with several elements
+    attr_reader :path, :loops
 
-    def compound? () 
-      return @compound
+    def initialize (path, loops=INFINITE_LOOP, time=Element::NO_TIME)
+      super(time)
+      @path = path
+      @loops = loops
+      @type = "music"
     end
 
   end

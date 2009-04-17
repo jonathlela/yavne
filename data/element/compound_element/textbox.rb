@@ -23,23 +23,34 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.      #
 ############################################################################++
 
-require "data/element.rb"
+$KCODE = "UTF-8"
+
+require "data/element/compound_element.rb"
+require "data/element/single_element/image.rb"
+require "data/element/single_element/text.rb"
+require "data/positionnable.rb"
 
 module Model
 
-  class Sound < SingleElement
+  class Textbox < CompoundElement
 
-    attr_reader :path, :loops
+    attr_reader :box, :texts
 
-    INFINITE_LOOP = "infinite loop"
+    include Positionnable
 
-    def initialize(path,loops=0,time=Element::NO_TIME)
-      super(time)
-      @path = path
-      @loops = loops
-      @type = "sound"
+    def initialize (box)
+      super([box])
+      @box = box
+      @texts = Array.new()
+      @type = "textbox"
     end
 
+    def add_text (text)
+      @texts.push(text)
+      add(text)
+    end
+    
   end
+
 
 end

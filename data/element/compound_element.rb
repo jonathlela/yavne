@@ -25,27 +25,27 @@
 
 $KCODE = "UTF-8"
 
+require "data/element.rb"
+
 module Model
 
-  # An Element is the basic type of the different elemnts in a game
+  # A CompoundElement is a lement composes by serveral elements 
 
-  class Element
-    
-    NO_TIME = "notime"
-    
-    @@ids = 0
+  class CompoundElement < Element
 
-    attr_reader :type, :id
+    attr_reader :elements
 
-    def initialize ()
-      @@ids += 1
-      @id = @@ids
+    def initialize (elements)
+      super()
+      @compound = true
+      @elements = Hash.new()
+      elements.each { |elt|
+        add(elt)
+      }
     end
-    
-    # Tell if an Element is single or made with several elements
 
-    def compound? () 
-      return @compound
+    def add (element)
+      @elements[element.id] = element
     end
 
   end
