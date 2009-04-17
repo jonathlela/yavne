@@ -69,7 +69,7 @@ class GLDrawingArea < Gtk::DrawingArea
     @width = width
     @height = height
 
-    @data = Model::ModelFactory.createFromFile("../demo/game.xml")
+    @data = Model::ModelFactory.create_from_file("../demo/game.xml")
     @controller = Controller::Controller.new(@data)
     @control_event_queue = Gtk_control_event_queue.new()
 
@@ -180,7 +180,6 @@ class GladeGlGlade
   end
   
 end
-
 
 # Main program
 if __FILE__ == $0
