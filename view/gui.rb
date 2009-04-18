@@ -59,7 +59,7 @@ class Gui
         update_time(elt)
       }
     else
-      if elt.time != Model::Element::NO_TIME then
+      if elt.time != Model::SingleElement::NO_TIME then
         Time.new(@pollevent,elt.time,elt.id,@step)
       end
     end

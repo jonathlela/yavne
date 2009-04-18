@@ -50,13 +50,13 @@ module View
       else
         case play.type
           when "music"
-          if play.loops == Model::Music::INFINITE_LOOP then
+          if play.loops == Model::Music::INFINITE_LOOPS then
             play = Music.new(play.path,-1)
           else
             play = Music.new(play.path,play.loops)
           end
           when "sound"
-          if play.loops == Model::Music::INFINITE_LOOP then
+          if play.loops == Model::Sound::INFINITE_LOOPS then
             play = Sound.new(play.path,-1)
           else
             play = Sound.new(play.path,play.loops)
