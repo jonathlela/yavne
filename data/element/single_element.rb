@@ -25,6 +25,7 @@
 
 $KCODE = "UTF-8"
 
+require "data/timeable.rb"
 require "data/element.rb"
 
 module Model
@@ -33,7 +34,7 @@ module Model
 
   class SingleElement < Element
     
-    attr_accessor :time 
+    include Timeable
 
     def initialize (time=NO_TIME)
       super()

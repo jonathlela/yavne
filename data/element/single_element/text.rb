@@ -26,16 +26,20 @@
 $KCODE = "UTF-8"
 
 require "data/element/single_element.rb"
+require "data/positionnable.rb"
 
 module Model
 
+  # A Text is an Element representing a piece of text together with its 
+  # decoration
+
   class Text < SingleElement
-    
-    attr_reader :text, :color, :font, :size
 
     include Positionnable
     
-    def initialize (text, color, font, size, time=Element::NO_TIME)
+    attr_reader :text, :color, :font, :size
+    
+    def initialize (text, color, font, size, time=NO_TIME)
       super(time)
       @text = text
       @color = color

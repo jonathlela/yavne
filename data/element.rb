@@ -25,21 +25,20 @@
 
 $KCODE = "UTF-8"
 
+require "data/identifiable.rb"
+
 module Model
 
   # An Element is the basic type of the different elemnts in a game
 
   class Element
-    
-    NO_TIME = "notime"
-    
-    @@ids = 0
+        
+    include Identifiable
 
-    attr_reader :type, :id
+    attr_reader :type
 
     def initialize ()
-      @@ids += 1
-      @id = @@ids
+      identify()
     end
     
     # Tell if an Element is single or made with several elements

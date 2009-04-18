@@ -23,17 +23,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.      #
 ############################################################################++
 
+$KCODE = "UTF-8"
+
 require "data/element/single_element.rb"
+require "data/loopable.rb"
 
 module Model
 
   class Sound < SingleElement
 
-    attr_reader :path, :loops
+    include Loopable
 
-    INFINITE_LOOP = "infinite loop"
+    attr_reader :path
 
-    def initialize (path,loops=0, time=Element::NO_TIME)
+    def initialize (path, loops=0, time=NO_TIME)
       super(time)
       @path = path
       @loops = loops

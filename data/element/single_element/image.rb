@@ -38,7 +38,7 @@ module Model
     
     attr_reader :path
     
-    def initialize (path,time=Element::NO_TIME)
+    def initialize (path,time=NO_TIME)
       super(time)
       left()
       top()

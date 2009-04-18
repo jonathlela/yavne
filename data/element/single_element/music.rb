@@ -26,6 +26,7 @@
 $KCODE = "UTF-8"
 
 require "data/element/single_element.rb"
+require "data/loopable.rb"
 
 module Model
 
@@ -33,11 +34,11 @@ module Model
 
   class Music < SingleElement
 
-    INFINITE_LOOP = "infinite loop"
+    include Loopable
 
-    attr_reader :path, :loops
+    attr_reader :path
 
-    def initialize (path, loops=INFINITE_LOOP, time=Element::NO_TIME)
+    def initialize (path, loops=INFINITE_LOOPS, time=NO_TIME)
       super(time)
       @path = path
       @loops = loops
