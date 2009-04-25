@@ -1,6 +1,6 @@
 module View
 
-  class Control_event
+  class ControlEvent
     
     MOUSE_BUTTON_PRESSED = "mouse_button_pressed"
     MOUSE_BUTTON_RELEASED = "mouse_button_released"
@@ -10,42 +10,26 @@ module View
 
   end
 
-  class Mouse_button_pressed < Control_event
+  class MouseButtonPressed < ControlEvent
     
     def initialize ()
-      @type = Control_event::MOUSE_BUTTON_PRESSED
+      @type = ControlEvent::MOUSE_BUTTON_PRESSED
     end
 
   end
 
-  class Mouse_button_released < Control_event
+  class MouseButtonReleased < ControlEvent
     
     def initialize ()
-      @type = Control_event::MOUSE_BUTTON_RELEASED
+      @type = ControlEvent::MOUSE_BUTTON_RELEASED
     end
 
   end
 
-  class Quit < Control_event
+  class Quit < ControlEvent
     
     def initialize ()
-      @type = Control_event::QUIT
-    end
-
-  end
-
-  class EventQueue 
-    
-    def initialize ()
-      @queue = Array.new()
-    end
-
-    def fetch ()
-      return @queue.shift()
-    end
-
-    def push (event)
-      @queue.push(event)
+      @type = ControlEvent::QUIT
     end
 
   end

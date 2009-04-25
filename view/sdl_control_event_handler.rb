@@ -2,7 +2,7 @@ require "view/control_event.rb"
 
 module View
 
-  class SDLController
+  class SDLControlEventHandler
 
     def handle_event (queue)
       while event = SDL::Event2.poll do
@@ -10,7 +10,7 @@ module View
           queue.push(Quit.new())
         end
         if event.kind_of?(SDL::Event2::MouseButtonDown)
-          queue.push(Mouse_button_pressed.new())
+          queue.push(MouseButtonReleased.new())
         end
       end
     end

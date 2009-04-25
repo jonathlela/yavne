@@ -34,23 +34,16 @@ require "data/model.rb"
 require "data/modelfactory.rb"
 require "controller/controller.rb"
 require "view/gui.rb"
+require "view/event_queue.rb"
 
-class Gtk_control_event_queue
+class GtkControlEventHandler
 
-  def initialize ()
-    @queue = Array.new()
-  end
-
-  def push (event)
-    @queue.push(event)
-  end
-
-  def shift ()
-    return @queue.shift()
+  def initialize (controle_event_queue)
+    @queue = controle_event_queue
   end
 
   def handle_event (queue)
-    while event = shift() do
+    while event = @queue.fetch() do
       queue.push(event)
     end
   end
@@ -71,7 +64,8 @@ class GLDrawingArea < Gtk::DrawingArea
 
     @data = Model::ModelFactory.create_from_file("../demo/game.xml")
     @controller = Controller::Controller.new(@data)
-    @control_event_queue = Gtk_control_event_queue.new()
+    @control_event_queue = View::EventQueue.new()
+    @control_event_handler = GtkControlEventHandler.new(@control_event_queue)
 
     @run = false
 
@@ -97,13 +91,13 @@ class GLDrawingArea < Gtk::DrawingArea
                Gdk::Event::BUTTON_RELEASE_MASK)
 
     signal_connect_after("button_press_event") {
-      @control_event_queue.push(View::Mouse_button_pressed.new())
+      @control_event_queue.push(View::MouseButtonPressed.new())
     }
     signal_connect_after("button_release_event") { 
-       @control_event_queue.push(View::Mouse_button_released.new())
+      @control_event_queue.push(View::MouseButtonReleased.new())
     }
 
-    @app = View::Gui.new(@controller,self,@control_event_queue)
+    @app = View::Gui.new(@controller,self,@control_event_handler)
     @controller.view = @app
   end
 

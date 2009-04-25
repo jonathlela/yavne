@@ -2,7 +2,6 @@ require 'sdl'
 require 'opengl'
 
 require "view/controller.rb"
-require "view/sdl_controller.rb"
 require "view/sdl_window.rb"
 require "view/gl_screen.rb"
 require "view/image.rb"
@@ -12,7 +11,7 @@ require "view/positionner.rb"
 require "view/timer.rb"
 require "view/time.rb"
 require "view/texturemanager.rb"
-require "view/pollevent.rb"
+require "view/event_queue.rb"
 require "view/control_event.rb"
 require "view/event.rb"
 
@@ -25,10 +24,10 @@ class Gui
   
   attr_reader :is_finished, :renderables
 
-  def initialize(controller,window,control_event)
+  def initialize (controller, window, control_event_handler)
     @controller = Controller.new(controller,self)
     @window = window
-    @control_event = control_event
+    @control_event_handler = control_event_handler
   end
 
   def init()
@@ -45,8 +44,8 @@ class Gui
     @last_fps = SDL::get_ticks()/1000
     @fps_timer = Timer.new(100)
     @event_timer = Timer.new(100)
-    @pollevent = PollEvent.new()
-    @control2_event = EventQueue.new()
+    @game_event_queue = EventQueue.new()
+    @control_event_queue = EventQueue.new()
     @step = 0
   end
 
@@ -61,7 +60,7 @@ class Gui
       }
     else
       if elt.time != Model::SingleElement::NO_TIME then
-        Time.new(@pollevent,elt.time,elt.id,@step)
+        Time.new(@game_event_queue,elt.time,elt.id,@step)
       end
     end
   end
@@ -114,9 +113,8 @@ class Gui
   end
 
   def run()
-    handle_event()
     if @event_timer.render?() then
-      handle_event()
+      handle_game_event()
       handle_control_event()
     end
     if @fps_timer.render?() then
@@ -136,8 +134,8 @@ class Gui
     end
   end
 
-  def handle_event()
-    while event = @pollevent.poll
+  def handle_game_event ()
+    while event = @game_event_queue.fetch() do
       if event.step == @step then
         if event.type?(Event::TIMEOUT)
           @controller.on_timeout(event.data)
@@ -147,12 +145,12 @@ class Gui
   end
 
   def handle_control_event ()
-    @control_event.handle_event(@control2_event)
-    while event = @control2_event.fetch() do
-      if event.type == Control_event::MOUSE_BUTTON_PRESSED then
+    @control_event_handler.handle_event(@control_event_queue)
+    while event = @control_event_queue.fetch() do
+      if event.type == ControlEvent::MOUSE_BUTTON_RELEASED then
         @controller.on_click()
       end
-      if event.type == Control_event::QUIT then
+      if event.type == ControlEvent::QUIT then
         @is_finished = true
         exit
       end

@@ -1,6 +1,6 @@
 module View
 
-  class PollEvent    
+  class EventQueue    
 
     def initialize ()
       @poll = Array.new()
@@ -10,7 +10,7 @@ module View
       @poll.push(event)
     end
 
-    def poll ()
+    def fetch ()
       return @poll.shift()
     end
 
