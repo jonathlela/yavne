@@ -2,7 +2,7 @@ require "view/control_event.rb"
 
 module View
 
-  class SDL_controller
+  class SDLController
 
     def handle_event (queue)
       while event = SDL::Event2.poll do

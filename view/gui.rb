@@ -1,8 +1,10 @@
 require 'sdl'
 require 'opengl'
+
 require "view/controller.rb"
-require "view/sdlwindow.rb"
-require "view/glscreen.rb"
+require "view/sdl_controller.rb"
+require "view/sdl_window.rb"
+require "view/gl_screen.rb"
 require "view/image.rb"
 require "view/text.rb"
 require "view/mediatracker.rb"
@@ -13,7 +15,6 @@ require "view/texturemanager.rb"
 require "view/pollevent.rb"
 require "view/control_event.rb"
 require "view/event.rb"
-require "view/sdlcontroller.rb"
 
 
 $KCODE="UTF8"
@@ -32,7 +33,7 @@ class Gui
 
   def init()
     @is_finished = false
-    @render = Gl_screen.new(@window.width,@window.height)
+    @render = GLScreen.new(@window.width,@window.height)
     @mediatracker = MediaTracker.new()
     @positionner = Positionner.new(@render,@mediatracker)
     @texturemanager = TextureManager.new()
