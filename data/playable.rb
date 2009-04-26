@@ -25,23 +25,18 @@
 
 $KCODE = "UTF-8"
 
-require "data/element/single_element.rb"
-require "data/playable.rb"
+require "data/timeable.rb"
+require "data/loopable.rb"
 
 module Model
 
-  class Sound < SingleElement
+  module Playable
 
-    include Playable
+    include Timeable
+    include Loopable
 
-    attr_reader :path
-
-    def initialize (path, loops=0, time=STATE_CHANGE)
-      super(time)
-      @path = path
-      @loops = loops
-      @type = "sound"
-    end
+    UNTIL_LAST = "until_last"
+    STATE_CHANGE = "state_change"
 
   end
 

@@ -43,7 +43,7 @@ module View
       end
     end
 
-    def get_playables(play)
+    def get_playable(play)
       id = play.id
       if @playables.has_key?(id) then
         return @playables[id]
@@ -63,6 +63,8 @@ module View
           end
         end
       end
+      @playables[id] = play
+      return play
     end
 
   end

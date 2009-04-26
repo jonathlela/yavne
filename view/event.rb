@@ -2,7 +2,9 @@ module View
 
   class Event
 
-    TIMEOUT="timeout"
+    TIME_OUT = "time_out"
+    STATE_CHANGED = "state_changed"
+    PLAY_FINISHED = "play_finished"
 
     attr_reader :type, :data, :step
 

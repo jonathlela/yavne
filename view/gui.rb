@@ -9,7 +9,9 @@ require "view/text.rb"
 require "view/mediatracker.rb"
 require "view/positionner.rb"
 require "view/timer.rb"
-require "view/time.rb"
+require "view/time_callback.rb"
+require "view/state_changed_callback.rb"
+require "view/play_finished_callback.rb"
 require "view/texturemanager.rb"
 require "view/event_queue.rb"
 require "view/control_event.rb"
@@ -22,7 +24,7 @@ module View
 
 class Gui
   
-  attr_reader :is_finished, :renderables
+  attr_reader :is_finished, :renderables, :step
 
   def initialize (controller, window, control_event_handler)
     @controller = Controller.new(controller,self)
@@ -32,6 +34,7 @@ class Gui
 
   def init()
     @is_finished = false
+    @is_paused = false
     @render = GLScreen.new(@window.width,@window.height)
     @mediatracker = MediaTracker.new()
     @positionner = Positionner.new(@render,@mediatracker)
@@ -39,13 +42,15 @@ class Gui
     SDL::Mouse.show()
     SDL::TTF.init()
     SDL.init(SDL::INIT_AUDIO)
-    SDL::Mixer.open(44100, SDL::Mixer::DEFAULT_FORMAT, 2, 1024)
+    SDL::Mixer.open(44100, SDL::Mixer::DEFAULT_FORMAT, SDL::Mixer::DEFAULT_CHANNELS, 1024)
     @fps = 0    
     @last_fps = SDL::get_ticks()/1000
     @fps_timer = Timer.new(100)
     @event_timer = Timer.new(100)
     @game_event_queue = EventQueue.new()
     @control_event_queue = EventQueue.new()
+    @renderables = Array.new()
+    @playables = Array.new()
     @step = 0
   end
 
@@ -59,12 +64,17 @@ class Gui
         update_time(elt)
       }
     else
-      if elt.time != Model::SingleElement::NO_TIME then
-        Time.new(@game_event_queue,elt.time,elt.id,@step)
+      if elt.time == Model::Playable::STATE_CHANGE then
+        StateChangedCallback.new(@game_event_queue,self,elt,@step)
+      elsif elt.time ==  Model::Playable::UNTIL_LAST then
+        PlayFinishedCallback.new(@game_event_queue,@mediatracker,elt,@step)
+      elsif elt.time != Model::Timeable::NO_TIME then
+        TimeCallback.new(@game_event_queue,elt.time,elt,@step)
       end
+
     end
   end
-
+  
   def update_render(elt)
     update_time(elt)
     element = @mediatracker.get_renderable(elt)
@@ -77,15 +87,15 @@ class Gui
   
   def update_play(elt)
     update_time(elt)
-    return @mediatracker.get_playables(elt)
+    return @mediatracker.get_playable(elt)
   end
-
+  
   def update_state(state)
     @step += 1
     @renderables = Array.new()
-    @playables = Array.new()
     if state.background != nil then
-      @renderables.push(update_render(state.background))
+      elt = state.background
+      @renderables.push(update_render(elt))
     end
     if !state.sprites.empty? then
       sprites = state.sprites.collect { |img|
@@ -94,26 +104,33 @@ class Gui
       @renderables.concat(sprites)
     end
     if state.textbox != nil then
-      @renderables.push(update_render(state.textbox))
+      elt = state.textbox
+      @renderables.push(update_render(elt))
     end
     if state.music != nil then
-      @playables.push(update_play(state.music))
+      elt = state.music
+      @playables.push(update_play(elt))
     end
     if state.sfx != nil then
-      @playables.push(update_play(state.sfx))
+      elt = state.sfx
+      @playables.push(update_play(elt))
     end
     update()
-    play()
   end
-
+  
   def update()
     @renderables.each { |elt|
       @texturemanager.load(elt)
     }
+    @playables.each { |elt|
+      if !elt.play?() then
+        elt.play()
+      end
+    }
   end
-
+  
   def run()
-    if @event_timer.render?() then
+    if @event_timer.render?() && !@is_paused then
       handle_game_event()
       handle_control_event()
     end
@@ -133,17 +150,28 @@ class Gui
       sleep(@fps_timer.sleep_time)
     end
   end
-
+  
   def handle_game_event ()
     while event = @game_event_queue.fetch() do
       if event.step == @step then
-        if event.type?(Event::TIMEOUT)
-          @controller.on_timeout(event.data)
+        if event.type?(Event::TIME_OUT)
+          @controller.on_timeout(event.data.id)
         end
+      end
+      if event.type?(Event::STATE_CHANGED)
+        playable = @mediatracker.get_playable(event.data)
+        if playable.play?() then
+          playable.halt()
+        end
+        @playables.delete(playable)
+      end
+      if event.type?(Event::PLAY_FINISHED)
+        playable = @mediatracker.get_playable(event.data)
+        @playables.delete(playable)
       end
     end
   end
-
+  
   def handle_control_event ()
     @control_event_handler.handle_event(@control_event_queue)
     while event = @control_event_queue.fetch() do
@@ -156,7 +184,7 @@ class Gui
       end
     end
   end
-
+  
   def render_element(element)
     if element.compound? then
       element.render_elements.each { |elt|
@@ -167,11 +195,32 @@ class Gui
       element.render(i)
     end
   end
+ 
 
-  def play()
+  def pause ()
     @playables.each { |play|
-      play.play()
+      play.pause()
     }
+  end
+  
+  def resume ()
+    @playables.each { |play|
+      play.resume()
+    }
+  end
+
+  def pause_game ()
+    if !@is_paused then
+      pause()
+      @is_paused = true
+    end
+  end
+
+  def resume_game ()
+    if @is_paused then
+      resume()
+      @is_paused = false
+    end
   end
 
   def render()
@@ -192,5 +241,3 @@ class Gui
 end
 
 end
-
-

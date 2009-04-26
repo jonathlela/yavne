@@ -2,10 +2,10 @@ require "view/event.rb"
 
 module View
 
-  class Time
+  class TimeCallback
    
     def initialize(poll,time,i,step)
-      event = Event.new(Event::TIMEOUT,step)
+      event = Event.new(Event::TIME_OUT,step)
       event.attach_data(i)
       Thread.new() {
         sleep(time/1000.0)
