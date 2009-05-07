@@ -25,23 +25,46 @@
 
 $KCODE = "UTF-8"
 
-$LOAD_PATH << File.expand_path(File.dirname(__FILE__)+ "/..")
+require 'sdl'
 
-require "data/model.rb"
-require "data/modelfactory.rb"
-require "controller/controller.rb"
-require "view/sdl_window.rb"
-require "view/sdl_control_event_handler.rb"
-require "view/gui.rb"
+module View
 
-data = Model::ModelFactory.create_from_file("game.xml")
-controller = Controller::Controller.new(data)
-window = View::SDLWindow.new(800,600,16)
-control_event_handler = View::SDLControlEventHandler.new()
-app = View::Gui.new(controller, window, control_event_handler)
-controller.view = app
-app.init()
-app.update_state(data.state)
-app.init_view()
-app.play()
-app.main()
+  class Clock
+    
+    def initialize ()
+      @time = 0
+      @is_paused = true
+    end
+
+    def get_time ()
+      if !@is_paused then
+        now = SDL::get_ticks()
+        @time = @time + now - @last_tick
+        @last_tick = now
+      end
+      return @time
+    end
+
+    def pause ()
+      if !@is_paused then
+        now = SDL::get_ticks()
+        @time = @time + now - @last_tick
+        @is_paused = true
+      end
+    end
+
+    def resume ()
+      if @is_paused then
+        @last_tick = SDL::get_ticks()
+        @is_paused = false
+      end
+    end
+
+    def start ()
+      resume()
+    end
+    
+  end
+
+end
+

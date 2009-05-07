@@ -80,6 +80,7 @@ class GLDrawingArea < Gtk::DrawingArea
         if !@run then
           @app.update_state(@data.state)
           @app.init_view()
+          @app.play()
           Thread.new() {@app.main()}
           @run = true
         end

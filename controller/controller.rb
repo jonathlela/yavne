@@ -10,14 +10,19 @@ module Controller
       @state = data.state
     end
     
-    def on_click()
+    def load_new_state ()
       @state = @data.next_state(@state)
       @view.update_state(@state)
     end
+
+    def on_click()
+      load_new_state()
+      @view.play()
+    end
     
     def on_timeout(data)
-      @state = @data.next_state(@state)
-      @view.update_state(@state)
+      load_new_state()
+      @view.play()
     end
     
   end

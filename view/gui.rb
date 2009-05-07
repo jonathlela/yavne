@@ -1,5 +1,6 @@
 require 'sdl'
 require 'opengl'
+require 'set'
 
 require "view/controller.rb"
 require "view/sdl_window.rb"
@@ -8,6 +9,7 @@ require "view/image.rb"
 require "view/text.rb"
 require "view/mediatracker.rb"
 require "view/positionner.rb"
+require "view/clock.rb"
 require "view/timer.rb"
 require "view/time_callback.rb"
 require "view/state_changed_callback.rb"
@@ -34,7 +36,7 @@ class Gui
 
   def init()
     @is_finished = false
-    @is_paused = false
+    @is_paused = true
     @render = GLScreen.new(@window.width,@window.height)
     @mediatracker = MediaTracker.new()
     @positionner = Positionner.new(@render,@mediatracker)
@@ -43,6 +45,7 @@ class Gui
     SDL::TTF.init()
     SDL.init(SDL::INIT_AUDIO)
     SDL::Mixer.open(44100, SDL::Mixer::DEFAULT_FORMAT, SDL::Mixer::DEFAULT_CHANNELS, 1024)
+    @clock = Clock.new()
     @fps = 0    
     @last_fps = SDL::get_ticks()/1000
     @fps_timer = Timer.new(100)
@@ -50,7 +53,7 @@ class Gui
     @game_event_queue = EventQueue.new()
     @control_event_queue = EventQueue.new()
     @renderables = Array.new()
-    @playables = Array.new()
+    @playables = Set.new()
     @step = 0
   end
 
@@ -69,7 +72,7 @@ class Gui
       elsif elt.time ==  Model::Playable::UNTIL_LAST then
         PlayFinishedCallback.new(@game_event_queue,@mediatracker,elt,@step)
       elsif elt.time != Model::Timeable::NO_TIME then
-        TimeCallback.new(@game_event_queue,elt.time,elt,@step)
+        TimeCallback.new(@game_event_queue,elt.time,@clock,elt,@step)
       end
 
     end
@@ -94,8 +97,8 @@ class Gui
     @step += 1
     @renderables = Array.new()
     if state.background != nil then
-      elt = state.background
-      @renderables.push(update_render(elt))
+      elt = update_render(state.background)
+      @renderables.push(elt)
     end
     if !state.sprites.empty? then
       sprites = state.sprites.collect { |img|
@@ -104,16 +107,16 @@ class Gui
       @renderables.concat(sprites)
     end
     if state.textbox != nil then
-      elt = state.textbox
-      @renderables.push(update_render(elt))
+      elt = update_render(state.textbox)
+      @renderables.push(elt)
     end
     if state.music != nil then
-      elt = state.music
-      @playables.push(update_play(elt))
+      elt = update_play(state.music)
+      @playables.add(elt)
     end
     if state.sfx != nil then
-      elt = state.sfx
-      @playables.push(update_play(elt))
+      elt = update_play(state.sfx)
+      @playables.add(elt)
     end
     update()
   end
@@ -121,11 +124,6 @@ class Gui
   def update()
     @renderables.each { |elt|
       @texturemanager.load(elt)
-    }
-    @playables.each { |elt|
-      if !elt.play?() then
-        elt.play()
-      end
     }
   end
   
@@ -195,18 +193,30 @@ class Gui
       element.render(i)
     end
   end
- 
+
+  def play ()
+    @playables.each { |play|
+      if !play.play?() then
+        play.play()
+      end
+    }
+    @clock.start()
+    @is_paused = false
+  end
+
 
   def pause ()
     @playables.each { |play|
       play.pause()
     }
+    @clock.pause()
   end
   
   def resume ()
     @playables.each { |play|
       play.resume()
     }
+    @clock.resume()
   end
 
   def pause_game ()

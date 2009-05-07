@@ -4,11 +4,17 @@ module View
 
   class TimeCallback
    
-    def initialize(poll,time,i,step)
+    def initialize(poll,time,clock,i,step)
       event = Event.new(Event::TIME_OUT,step)
       event.attach_data(i)
+      alarm = clock.get_time() + time
       Thread.new() {
-        sleep(time/1000.0)
+        while true do
+          if clock.get_time() >= alarm  then
+            break
+          end
+          sleep(0.01)
+        end
         poll.push(event)
       }
     end
